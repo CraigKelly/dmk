@@ -43,6 +43,9 @@ Pipelines like this are often written Python or R, partially automated with
 shell scripts, and then tied together with a Makefile (or a SConstruct file if
 you're an `scons` fan).
 
+*Protip*: if you're looking for a command to handle building reports from `.tex`
+files (including handling metapost and biblatex), look into `rubber`.
+
 ## What is this NOT for?
 
 This is *not* mean to replace a real automated build tool for a software
@@ -51,5 +54,8 @@ project. As a general rule:
 * If you're build Go software, use the Go tools (and optionally make)
 * If you're building Java/Scala use `sbt`, `gradle`, `mvn`, `ant`, etc
 * If you're building .NET, erm, I'm not sure
-* There are great tools like `scons` that understand how to build lots of things (including LaTeX docs)
-* If you're not sure, at least understand why you wouldn't just use `make`
+* There are great tools like `scons` that understand how to build lots of artifacts (including LaTeX docs)
+* If you're not sure, at least understand why you wouldn't use `make`
+
+For instance, this project (written in Go) is actually built with `make` + the
+standard Go tools.
