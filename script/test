@@ -6,5 +6,5 @@ cd "$SCRIPT_DIR/.."
 TESTED=$(pwd)/.tested
 
 rm -f "$TESTED"
-go test -v -race -tags "test" "$@"
+godep go test -v -race -tags "test" "$@"
 touch "$TESTED"

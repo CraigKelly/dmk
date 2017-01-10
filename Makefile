@@ -19,4 +19,7 @@ $(TESTED): $(SOURCES)
 cover: $(SOURCES)
 	$(TOOLDIR)/cover
 
-.PHONY: clean test cover build run
+update: clean
+	$(TOOLDIR)/update
+
+.PHONY: clean test cover build run update

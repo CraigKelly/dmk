@@ -62,5 +62,5 @@ standard Go tools.
 
 ## Building
 
-This project uses the YAML library at https://github.com/go-yaml/yaml, but
-already in the vendor directory.
+`godep` is used to manage dependencies in the vendor directory. This should be
+handled transparently by the `Makefile`.
