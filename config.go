@@ -4,6 +4,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+//TODO: allow globbing - each entry in Inputs, Outputs, and Clean can be a glob pattern
+
 // ConfigFile represents all the data read from a config file
 type ConfigFile map[string]*BuildStep
 

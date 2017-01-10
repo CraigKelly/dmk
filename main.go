@@ -35,23 +35,47 @@ func main() {
 		verb = log.New(ioutil.Discard, "", 0)
 	}
 
-	verb.Printf("Verbose mode ON\n")
-	verb.Printf("Clean == %v\n", *clean)
-	verb.Printf("Pipeline File == %s\n", *pipelineFile)
+	verb.Printf("Verbose mode: ON\n")
+	verb.Printf("Clean: %v\n", *clean)
+	verb.Printf("Pipeline File: %s\n", *pipelineFile)
 
 	// TODO: read config file
+	cfgText, err := ioutil.ReadFile(*pipelineFile)
+	pcheck(err)
+	verb.Printf("Read %d bytes from %s\n", len(cfgText), *pipelineFile)
+
+	cfg, err := ReadConfig(cfgText)
+	pcheck(err)
+	verb.Printf("Found %d build steps", len(cfg))
 
 	if *clean {
-		doClean()
+		doClean(cfg)
 	} else {
-		doBuild()
+		doBuild(cfg)
 	}
 }
 
-func doClean() {
-	log.Printf("TODO: actually perform clean\n")
+func doClean(cfg ConfigFile) {
+	targets := NewUniqueStrings()
+
+	for _, step := range cfg {
+		for _, file := range step.Outputs {
+			targets.Add(file)
+		}
+		for _, file := range step.Clean {
+			targets.Add(file)
+		}
+	}
+
+	targetFiles := targets.Strings()
+	verb.Printf("Cleaning %d files\n", len(targetFiles))
+
+	for _, file := range targetFiles {
+		log.Printf("CLEAN: %s\n", file)
+		// TODO: clean file
+	}
 }
 
-func doBuild() {
+func doBuild(cfg ConfigFile) {
 	log.Printf("TODO: actually perform build\n")
 }
