@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 var buildDate string // Set by our build script
@@ -39,8 +40,12 @@ func main() {
 	verb.Printf("Clean: %v\n", *clean)
 	verb.Printf("Pipeline File: %s\n", *pipelineFile)
 
-	// TODO: read config file
+	// read the config file
 	cfgText, err := ioutil.ReadFile(*pipelineFile)
+	if os.IsNotExist(err) {
+		log.Printf("%s does not exist - exiting\n", *pipelineFile)
+		return
+	}
 	pcheck(err)
 	verb.Printf("Read %d bytes from %s\n", len(cfgText), *pipelineFile)
 
@@ -48,6 +53,14 @@ func main() {
 	pcheck(err)
 	verb.Printf("Found %d build steps", len(cfg))
 
+	// change to the pipeline file's directory
+	pipelineDir := filepath.Dir(*pipelineFile)
+	if pipelineDir != "." {
+		verb.Printf("Changing current directory to: %s\n", pipelineDir)
+	}
+	pcheck(os.Chdir(pipelineDir))
+
+	// Do what we're supposed to do
 	if *clean {
 		doClean(cfg)
 	} else {
@@ -72,7 +85,10 @@ func doClean(cfg ConfigFile) {
 
 	for _, file := range targetFiles {
 		log.Printf("CLEAN: %s\n", file)
-		// TODO: clean file
+		err := os.RemoveAll(file)
+		if err != nil && !os.IsNotExist(err) {
+			log.Printf("  failed to clean: %s\n", err.Error())
+		}
 	}
 }
 

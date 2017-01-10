@@ -29,6 +29,12 @@ single build step executes the following steps:
 The outputs for a step must be unique to that step: you can't have two steps
 both list `foo.data` as an output.
 
+## Some helpful hints
+
+File names are assumed to be relative to the Pipeline file. The current working
+directory is changed to the same directory as the Pipeline file before anything
+is done.
+
 
 ## Who should use this?
 
