@@ -59,3 +59,8 @@ project. As a general rule:
 
 For instance, this project (written in Go) is actually built with `make` + the
 standard Go tools.
+
+## Building
+
+This project uses the YAML library at https://github.com/go-yaml/yaml, but
+already in the vendor directory.

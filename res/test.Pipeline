@@ -1,0 +1,18 @@
+step1:
+  command: "xform i{1,2,3}.txt"
+  inputs:
+    - i1.txt
+    - i2.txt
+    - i3.txt
+  outputs:
+    - o1.txt
+    - o2.txt
+    - o3.txt
+  clean: [a.aux, b.log]
+
+step2:
+  command: cmd
+  inputs:
+    - test.txt
+  outputs:
+    - output.bin
