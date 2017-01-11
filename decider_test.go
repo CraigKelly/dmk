@@ -39,7 +39,7 @@ func TestTimeDecider(t *testing.T) {
 	}
 	o1.Close()
 
-	// No input and file exists - must build
+	// No input and file exists - no build necessary
 	b, e = d.NeedBuild([]string{}, []string{o1.Name()})
 	assert.False(b)
 	assert.Nil(e)
