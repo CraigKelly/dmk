@@ -10,16 +10,17 @@ func TestUniqueStrings(t *testing.T) {
 	assert := assert.New(t)
 
 	us := NewUniqueStrings()
-	assert.Len(us.strings, 0)
+	assert.Len(us.Seen, 0)
 
 	us.Add("b")
 	us.Add("a")
-	assert.Len(us.strings, 2)
+	assert.Len(us.Seen, 2)
 
 	us.Add("b")
 	us.Add("a")
-	assert.Len(us.strings, 2)
+	assert.Len(us.Seen, 2)
 
+	// Test twice
 	assert.Equal([]string{"a", "b"}, us.Strings())
 	assert.Equal([]string{"a", "b"}, us.Strings())
 }

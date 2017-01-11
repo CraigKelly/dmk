@@ -15,34 +15,27 @@ func pcheck(err error) {
 // UniqueStrings is a simple type around a map for a (sometimes sorted)
 // list of unique strings
 type UniqueStrings struct {
-	Seen    map[string]bool
-	Sorted  bool
-	strings []string
+	Seen map[string]bool
 }
 
 // NewUniqueStrings returns a new, empty set of unique strings
 func NewUniqueStrings() *UniqueStrings {
 	return &UniqueStrings{
-		Seen:    make(map[string]bool),
-		Sorted:  false,
-		strings: make([]string, 0),
+		Seen: make(map[string]bool),
 	}
 }
 
 // Add a string to the unique list
 func (u *UniqueStrings) Add(s string) {
-	if _, inMap := u.Seen[s]; !inMap {
-		u.strings = append(u.strings, s)
-		u.Seen[s] = true
-		u.Sorted = false
-	}
+	u.Seen[s] = true
 }
 
 // Strings returns the sorted array of strings
 func (u *UniqueStrings) Strings() []string {
-	if !u.Sorted {
-		sort.Strings(u.strings)
-		u.Sorted = true
+	strings := make([]string, 0, len(u.Seen))
+	for k := range u.Seen {
+		strings = append(strings, k)
 	}
-	return u.strings
+	sort.Strings(strings)
+	return strings
 }
