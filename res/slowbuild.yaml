@@ -1,3 +1,6 @@
+# Simple build file to test bash shell usage, dependencies, and a build that
+# takes a second (mainly for us to visually track what's going on)
+
 step1:
     command: "./slow file1.txt This is the first file"
     outputs:

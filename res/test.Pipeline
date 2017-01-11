@@ -1,5 +1,9 @@
+# A simple test build file with two indendent steps and a final step that
+# depends on them. Note that the commands are NOT supposed to exist so that
+# this build file will fail when run (although a clean would success)
+
 step1:
-    command: "xform i{1,2,3}.txt"
+    command: "xformxyz i{1,2,3}.txt"
     inputs:
         - i1.txt
         - i2.txt
@@ -11,14 +15,14 @@ step1:
     clean: [a.aux, b.log]
 
 step2:
-    command: cmd
+    command: cmd1xyz
     inputs:
         - test.txt
     outputs:
         - output.bin
 
 depstep:
-    command: cmd2
+    command: cmd2xyz
     inputs:
         - o3.txt
         - output.bin
