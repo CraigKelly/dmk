@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
 )
 
 var buildDate string // Set by our build script
@@ -93,5 +94,30 @@ func doClean(cfg ConfigFile) {
 }
 
 func doBuild(cfg ConfigFile) {
-	log.Printf("TODO: actually perform build\n")
+	// Get all targets (outputs)
+	targets := NewUniqueStrings()
+	for _, step := range cfg {
+		for _, file := range step.Outputs {
+			targets.Add(file)
+		}
+	}
+
+	// Start all steps running
+	running := make([]*BuildStepInstance, 0, len(cfg))
+	wg := sync.WaitGroup{}
+	for _, step := range cfg {
+		verb.Printf("Starting step %s\n", step.Name)
+		one := NewBuildStepInst(step, targets.Seen, verb)
+		running = append(running, one)
+		wg.Add(1)
+		go func() {
+			one.Run()
+			wg.Done()
+		}()
+	}
+
+	// TODO: need a watchdog
+
+	// Wait for them to complete
+	wg.Wait()
 }
