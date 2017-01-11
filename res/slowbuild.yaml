@@ -1,0 +1,17 @@
+step1:
+    command: "./slow file1.txt This is the first file"
+    outputs:
+        - file1.txt
+
+step2:
+    command: "./slow file2.txt This is the second file"
+    outputs:
+        - file2.txt
+
+combine:
+    command: "cat file*.txt > combined.txt"
+    inputs:
+        - file1.txt
+        - file2.txt
+    outputs:
+        - combined.txt

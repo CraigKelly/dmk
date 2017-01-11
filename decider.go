@@ -21,8 +21,10 @@ func (td TimeDecider) NeedBuild(inputs []string, outputs []string) (bool, error)
 	if len(outputs) < 1 {
 		return false, errors.New("Nothing to build")
 	}
-	if len(inputs) < 1 {
-		return true, nil // Always build if no inputs
+
+	if missing, err := anyMissing(outputs); missing || err != nil {
+		// Either we have an output missing or an error: either way we're done
+		return missing, err
 	}
 
 	inputMaxTime, err := maxTime(inputs)
@@ -87,4 +89,22 @@ func minTime(files []string) (time.Time, error) {
 	}
 
 	return minTime, nil
+}
+
+// Note that this is returned by NeedBuild above
+func anyMissing(files []string) (bool, error) {
+	if len(files) < 1 {
+		return false, nil // no files - nothing can be missing
+	}
+
+	for _, file := range files {
+		if _, err := os.Stat(file); err != nil {
+			if os.IsNotExist(err) {
+				return true, nil
+			}
+			return true, err
+		}
+	}
+
+	return false, nil
 }

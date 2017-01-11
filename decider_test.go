@@ -39,9 +39,9 @@ func TestTimeDecider(t *testing.T) {
 	}
 	o1.Close()
 
-	// No input - must build
+	// No input and file exists - must build
 	b, e = d.NeedBuild([]string{}, []string{o1.Name()})
-	assert.True(b)
+	assert.False(b)
 	assert.Nil(e)
 
 	time.Sleep(5 * time.Millisecond) // Hacky way to make sure input is newer

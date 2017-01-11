@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+
+"""Run slowly and then create the file specified."""
+
+import sys
+import time
+
+
+def main():
+    """Entry point."""
+    filename, contents = sys.argv[1], sys.argv[2:]
+    if not filename:
+        raise ValueError("No file name given on command line")
+
+    time.sleep(1)
+
+    with open(filename, "w") as f:
+        f.writelines([
+            'File Name: ' + filename + '\n',
+            'Contents:\n',
+            ' '.join(contents) + '\n'
+            'EOF\n'
+        ])
+
+
+if __name__ == '__main__':
+    main()

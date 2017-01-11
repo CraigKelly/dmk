@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 const (
@@ -114,6 +115,7 @@ func (i *BuildStepInstance) Run() error {
 	// If we have inputs, check to see if we need to build
 	needBuild, err := i.decider.NeedBuild(i.Step.Inputs, i.Step.Outputs)
 	if err != nil {
+		i.verb.Printf("%s: failing on build decision\n", i.Step.Name)
 		return i.fail(err)
 	}
 	if !needBuild {
@@ -130,7 +132,13 @@ func (i *BuildStepInstance) Run() error {
 	cmd.Stdout = &out
 	cmdErr := cmd.Run()
 
-	i.verb.Printf("%s stdout begin---\n%s\n---stdout end for %s\n", i.Step.Name, out.String(), i.Step.Name)
+	stdoutText := strings.TrimSpace(out.String())
+	if len(stdoutText) > 0 {
+		i.verb.Printf("%s stdout begin---\n%s\n---stdout end for %s\n",
+			i.Step.Name,
+			out.String(),
+			i.Step.Name)
+	}
 
 	if cmdErr != nil {
 		return i.fail(cmdErr)
