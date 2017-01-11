@@ -33,7 +33,7 @@ func (td TimeDecider) NeedBuild(inputs []string, outputs []string) (bool, error)
 	if err != nil {
 		return false, err
 	}
-	if outputMinTime.After(inputMaxTime) {
+	if outputMinTime.Before(inputMaxTime) {
 		return true, nil // Need a build
 	}
 	return false, nil // Everything OK - no build
