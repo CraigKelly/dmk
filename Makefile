@@ -16,10 +16,13 @@ test: $(TESTED)
 $(TESTED): $(SOURCES)
 	$(TOOLDIR)/test
 
+testv: clean
+	$(TOOLDIR)/test -v
+
 cover: $(SOURCES)
 	$(TOOLDIR)/cover
 
 update: clean
 	$(TOOLDIR)/update
 
-.PHONY: clean test cover build run update
+.PHONY: clean test testv cover build run update

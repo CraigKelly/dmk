@@ -44,7 +44,7 @@ func TestTimeDecider(t *testing.T) {
 	assert.True(b)
 	assert.Nil(e)
 
-	time.Sleep(500 * time.Millisecond) // Hacky way to make sure input is newer
+	time.Sleep(5 * time.Millisecond) // Hacky way to make sure input is newer
 
 	i1, e := ioutil.TempFile("", "dmktest")
 	assert.Nil(e)
