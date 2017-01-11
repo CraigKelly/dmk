@@ -102,12 +102,16 @@ func doBuild(cfg ConfigFile) {
 		}
 	}
 
+	// We need a broadcaster for dependency notifications
+	broad := NewBroadcaster()
+	pcheck(broad.Start())
+
 	// Start all steps running
 	running := make([]*BuildStepInstance, 0, len(cfg))
 	wg := sync.WaitGroup{}
 	for _, step := range cfg {
 		verb.Printf("Starting step %s\n", step.Name)
-		one := NewBuildStepInst(step, targets.Seen, verb)
+		one := NewBuildStepInst(step, targets.Seen, verb, broad)
 		running = append(running, one)
 		wg.Add(1)
 		go func() {
@@ -120,4 +124,5 @@ func doBuild(cfg ConfigFile) {
 
 	// Wait for them to complete
 	wg.Wait()
+	broad.Kill() //TODO: this should probably be called by our watchdog above
 }

@@ -1,18 +1,30 @@
 step1:
-  command: "xform i{1,2,3}.txt"
-  inputs:
-    - i1.txt
-    - i2.txt
-    - i3.txt
-  outputs:
-    - o1.txt
-    - o2.txt
-    - o3.txt
-  clean: [a.aux, b.log]
+    command: "xform i{1,2,3}.txt"
+    inputs:
+        - i1.txt
+        - i2.txt
+        - i3.txt
+    outputs:
+        - o1.txt
+        - o2.txt
+        - o3.txt
+    clean: [a.aux, b.log]
 
 step2:
-  command: cmd
-  inputs:
-    - test.txt
-  outputs:
-    - output.bin
+    command: cmd
+    inputs:
+        - test.txt
+    outputs:
+        - output.bin
+
+depstep:
+    command: cmd2
+    inputs:
+        - o3.txt
+        - output.bin
+    outputs:
+        - combination.output
+    clean:
+        - need-cleaning.1
+        - need-cleaning.2
+        - need-cleaning.3

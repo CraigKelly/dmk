@@ -3,6 +3,7 @@ TOOLDIR=$(BASEDIR)/script
 
 BINARY=dmk
 SOURCES := $(shell find $(BASEDIR) -name '*.go')
+TESTRESOURCES := $(shell find '$(BASEDIR)/res' -type f)
 TESTED=.tested
 
 build: $(BINARY)
@@ -12,7 +13,7 @@ $(BINARY): $(SOURCES) $(TESTED)
 clean:
 	rm -f $(BINARY) debug debug.test cover.out $(TESTED)
 
-test: $(TESTED)
+test: $(TESTED) $(TESTRESOURCES)
 $(TESTED): $(SOURCES)
 	$(TOOLDIR)/test
 

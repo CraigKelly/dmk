@@ -19,9 +19,10 @@ func TestConfigFileRead(t *testing.T) {
 	pcheck(err)
 
 	assert.NotEmpty(cfg)
-	assert.Len(cfg, 2)
+	assert.Len(cfg, 3)
 	assert.Contains(cfg, "step1")
 	assert.Contains(cfg, "step2")
+	assert.Contains(cfg, "depstep")
 
 	step1 := cfg["step1"]
 	assert.Equal("step1", step1.Name)
@@ -36,4 +37,11 @@ func TestConfigFileRead(t *testing.T) {
 	assert.Equal([]string{"test.txt"}, step2.Inputs)
 	assert.Equal([]string{"output.bin"}, step2.Outputs)
 	assert.Len(step2.Clean, 0)
+
+	depstep := cfg["depstep"]
+	assert.Equal("depstep", depstep.Name)
+	assert.Equal("cmd2", depstep.Command)
+	assert.Equal([]string{"o3.txt", "output.bin"}, depstep.Inputs)
+	assert.Equal([]string{"combination.output"}, depstep.Outputs)
+	assert.Equal([]string{"need-cleaning.1", "need-cleaning.2", "need-cleaning.3"}, depstep.Clean)
 }

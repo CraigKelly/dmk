@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"log"
+	"os"
+	"os/exec"
 )
 
 const (
@@ -20,10 +23,11 @@ type BuildStepInstance struct {
 	State   int
 	verb    *log.Logger
 	decider Decider
+	broad   *Broadcaster
 }
 
 // NewBuildStepInst creates an unstarted instance from the BuildStep
-func NewBuildStepInst(step *BuildStep, allOutputs map[string]bool, verb *log.Logger) *BuildStepInstance {
+func NewBuildStepInst(step *BuildStep, allOutputs map[string]bool, verb *log.Logger, broad *Broadcaster) *BuildStepInstance {
 	deps := make([]string, 0, len(step.Inputs))
 	for _, file := range step.Inputs {
 		if _, inMap := allOutputs[file]; inMap {
@@ -39,14 +43,15 @@ func NewBuildStepInst(step *BuildStep, allOutputs map[string]bool, verb *log.Log
 		State:   buildUnstarted,
 		verb:    verb,
 		decider: TimeDecider{},
+		broad:   broad,
 	}
 }
 
 // Tell everyone that our outputs are done (even if we failed)
 func (i *BuildStepInstance) notify() {
 	for _, file := range i.Step.Outputs {
-		// TODO: actual broadcast
 		i.verb.Printf("%s: notifying for %s\n", i.Step.Name, file)
+		i.broad.Send(file)
 	}
 }
 
@@ -81,9 +86,29 @@ func (i *BuildStepInstance) Run() error {
 	i.State = buildStarted
 
 	// If any of the required inputs are another step's outputs, then wait for
-	// a built message.
+	// a built message for all our deps
 	if len(i.Deps) > 0 {
-		// TODO: wait for built message(s)
+		waitingDeps := make(map[string]bool)
+		for _, d := range i.Deps {
+			waitingDeps[d] = true
+		}
+		i.verb.Printf("%s: waiting for %d deps\n", i.Step.Name, len(waitingDeps))
+
+		list := i.broad.GetListener()
+
+		for msg := range list.Delivery {
+			file := msg.Msg
+			if _, inMap := waitingDeps[file]; inMap {
+				delete(waitingDeps, file)
+			}
+			if len(waitingDeps) > 0 {
+				list.Respond(true) // Keep working
+			} else {
+				list.Respond(false) // Have everything we need!
+				i.verb.Printf("%s: all deps are done - proceeding\n", i.Step.Name)
+				break
+			}
+		}
 	}
 
 	// If we have inputs, check to see if we need to build
@@ -98,12 +123,34 @@ func (i *BuildStepInstance) Run() error {
 
 	// Time to execute!
 	i.State = buildExecuting
+	log.Printf("%s: %s\n", i.Step.Name, i.Step.Command)
 
-	// TODO: run the command
+	cmd := exec.Command("/bin/bash", "-c", i.Step.Command)
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	cmdErr := cmd.Run()
 
-	// TODO: if command retcode was nonzero return failed
-	// TODO: if any outputs missing return failed
-	// TODO: if any outputs older than inputs, then return failed
+	i.verb.Printf("%s stdout begin---\n%s\n---stdout end for %s\n", i.Step.Name, out.String(), i.Step.Name)
+
+	if cmdErr != nil {
+		return i.fail(cmdErr)
+	}
+
+	// If we still need a build, then we failed
+	stillNeedBuild, err := i.decider.NeedBuild(i.Step.Inputs, i.Step.Outputs)
+	if stillNeedBuild {
+		return i.fail(errors.New("Build still required after command finished"))
+	}
+	if err != nil {
+		return i.fail(err)
+	}
+
+	// if any outputs missing return failed
+	for _, file := range i.Step.Outputs {
+		if _, err := os.Stat(file); os.IsNotExist(err) {
+			return i.fail(err)
+		}
+	}
 
 	return i.succeed()
 }
