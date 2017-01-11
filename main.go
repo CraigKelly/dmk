@@ -125,4 +125,21 @@ func doBuild(cfg ConfigFile) {
 	// Wait for them to complete
 	wg.Wait()
 	broad.Kill() //TODO: this should probably be called by our watchdog above
+
+	// Determine and use exit code
+	failCount := 0
+	successCount := 0
+	for _, step := range running {
+		if step.State == buildCompleted {
+			successCount++
+		} else if step.State == buildFailed {
+			failCount++
+		}
+	}
+	if failCount+successCount < len(running) {
+		log.Printf("Fatal error: at least one step has NOT completed\n")
+		os.Exit(-1)
+	} else {
+		os.Exit(failCount) // remember 0 is success on most OS's
+	}
 }
