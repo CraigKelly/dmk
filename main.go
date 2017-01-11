@@ -116,7 +116,7 @@ func doBuild(cfg ConfigFile) {
 		}()
 	}
 
-	// TODO: need a watchdog
+	// TODO: need a watchdog - look for hung steps, look for sitautions where build can't finish, etc
 
 	// Wait for them to complete
 	wg.Wait()
