@@ -143,7 +143,7 @@ func (i *BuildStepInstance) Run() error {
 			i.Step.Name)
 	}
 	if len(stderrText) > 0 {
-		i.verb.Printf("%s stderr begin---\n%s\n---stderr end for %s\n",
+		log.Printf("%s stderr begin---\n%s\n---stderr end for %s\n",
 			i.Step.Name,
 			stdErr.String(),
 			i.Step.Name)
