@@ -128,15 +128,24 @@ func (i *BuildStepInstance) Run() error {
 	log.Printf("%s: %s\n", i.Step.Name, i.Step.Command)
 
 	cmd := exec.Command("/bin/bash", "-c", i.Step.Command)
-	var out bytes.Buffer
-	cmd.Stdout = &out
+	var stdOut bytes.Buffer
+	cmd.Stdout = &stdOut
+	var stdErr bytes.Buffer
+	cmd.Stderr = &stdErr
 	cmdErr := cmd.Run()
 
-	stdoutText := strings.TrimSpace(out.String())
+	stdoutText := strings.TrimSpace(stdOut.String())
+	stderrText := strings.TrimSpace(stdErr.String())
 	if len(stdoutText) > 0 {
 		i.verb.Printf("%s stdout begin---\n%s\n---stdout end for %s\n",
 			i.Step.Name,
-			out.String(),
+			stdOut.String(),
+			i.Step.Name)
+	}
+	if len(stderrText) > 0 {
+		i.verb.Printf("%s stderr begin---\n%s\n---stderr end for %s\n",
+			i.Step.Name,
+			stdErr.String(),
 			i.Step.Name)
 	}
 

@@ -12,7 +12,7 @@ def main():
     if not filename:
         raise ValueError("No file name given on command line")
 
-    time.sleep(1)
+    time.sleep(0.1)
 
     with open(filename, "w") as f:
         f.writelines([

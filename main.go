@@ -1,5 +1,3 @@
-// +build !test
-
 package main
 
 import (
@@ -16,8 +14,6 @@ var buildDate string // Set by our build script
 /////////////////////////////////////////////////////////////////////////////
 // Entry point
 
-var verb *log.Logger
-
 func main() {
 	log.SetFlags(0)
 	log.Printf("dmk - built %s\n", buildDate)
@@ -31,6 +27,7 @@ func main() {
 
 	// If it should always be printed, we use log. If it should only be printed
 	// verbose=true, then we use verb
+	var verb *log.Logger
 	if *verbose {
 		verb = log.New(os.Stdout, "", 0)
 	} else {
@@ -62,14 +59,17 @@ func main() {
 	pcheck(os.Chdir(pipelineDir))
 
 	// Do what we're supposed to do
+	var exitCode int
 	if *clean {
-		doClean(cfg)
+		exitCode = DoClean(cfg, verb)
 	} else {
-		doBuild(cfg)
+		exitCode = DoBuild(cfg, verb)
 	}
+	os.Exit(exitCode)
 }
 
-func doClean(cfg ConfigFile) {
+// DoClean cleans all files specified by the config file
+func DoClean(cfg ConfigFile, verb *log.Logger) int {
 	targets := NewUniqueStrings()
 
 	for _, step := range cfg {
@@ -84,16 +84,21 @@ func doClean(cfg ConfigFile) {
 	targetFiles := targets.Strings()
 	verb.Printf("Cleaning %d files\n", len(targetFiles))
 
+	failCount := 0
 	for _, file := range targetFiles {
 		log.Printf("CLEAN: %s\n", file)
 		err := os.RemoveAll(file)
 		if err != nil && !os.IsNotExist(err) {
+			failCount++
 			log.Printf("  failed to clean: %s\n", err.Error())
 		}
 	}
+
+	return failCount
 }
 
-func doBuild(cfg ConfigFile) {
+// DoBuild um, does the build
+func DoBuild(cfg ConfigFile, verb *log.Logger) int {
 	// Get all targets (outputs)
 	targets := NewUniqueStrings()
 	for _, step := range cfg {
@@ -138,8 +143,7 @@ func doBuild(cfg ConfigFile) {
 	}
 	if failCount+successCount < len(running) {
 		log.Printf("Fatal error: at least one step has NOT completed\n")
-		os.Exit(-1)
-	} else {
-		os.Exit(failCount) // remember 0 is success on most OS's
+		failCount = failCount + successCount + 1
 	}
+	return failCount
 }
