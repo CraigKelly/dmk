@@ -35,6 +35,7 @@ File names are assumed to be relative to the Pipeline file. The current working
 directory is changed to the same directory as the Pipeline file before anything
 is done.
 
+Commands are executed in a new bash shell (so you need bash)
 
 ## Who should use this?
 
