@@ -9,50 +9,67 @@ import (
 	"sync"
 )
 
-var buildDate string // Set by our build script
-
 /////////////////////////////////////////////////////////////////////////////
 // Entry point
 
 func main() {
 	log.SetFlags(0)
-	log.Printf("dmk - built %s\n", buildDate)
+	log.Printf("dmk %s\n", Version())
 
 	flags := flag.NewFlagSet("twivility", flag.ExitOnError)
-	pipelineFile := flags.String("f", "Pipeline", "Pipeline file name")
-	clean := flags.Bool("c", false, "Clean instead of build")
-	verbose := flags.Bool("v", false, "verbose output")
+	pipelineFileSpec := flags.String("f", "", "Pipeline file name")
+	cleanSpec := flags.Bool("c", false, "Clean instead of build")
+	verboseSpec := flags.Bool("v", false, "verbose output")
 
 	pcheck(flags.Parse(os.Args[1:]))
+
+	clean := *cleanSpec
+	verbose := *verboseSpec
+
+	// If they didn't select a pipeline file, we try to find a default
+	var pipelineFile string
+	if pipelineFileSpec == nil || *pipelineFileSpec == "" {
+		pipelineFile = FirstFileFound(
+			"Pipeline", "Pipeline.yaml",
+			"pipeline", "pipeline.yaml",
+			".Pipeline", ".Pipeline.yaml",
+			".pipeline", ".pipeline.yaml",
+		)
+		if pipelineFile == "" {
+			pipelineFile = "Pipeline.yaml" // choose what we'll show
+		}
+	} else {
+		pipelineFile = *pipelineFileSpec
+	}
 
 	// If it should always be printed, we use log. If it should only be printed
 	// verbose=true, then we use verb
 	var verb *log.Logger
-	if *verbose {
+	if verbose {
 		verb = log.New(os.Stdout, "", 0)
 	} else {
 		verb = log.New(ioutil.Discard, "", 0)
 	}
 
 	verb.Printf("Verbose mode: ON\n")
-	verb.Printf("Clean: %v\n", *clean)
-	verb.Printf("Pipeline File: %s\n", *pipelineFile)
+	verb.Printf("Clean: %v\n", clean)
+	verb.Printf("Pipeline File: %s\n", pipelineFile)
 
 	// read the config file
-	cfgText, err := ioutil.ReadFile(*pipelineFile)
+	cfgText, err := ioutil.ReadFile(pipelineFile)
 	if os.IsNotExist(err) {
-		log.Printf("%s does not exist - exiting\n", *pipelineFile)
+		log.Printf("%s does not exist - exiting\n", pipelineFile)
 		return
 	}
 	pcheck(err)
-	verb.Printf("Read %d bytes from %s\n", len(cfgText), *pipelineFile)
+	verb.Printf("Read %d bytes from %s\n", len(cfgText), pipelineFile)
 
 	cfg, err := ReadConfig(cfgText)
 	pcheck(err)
 	verb.Printf("Found %d build steps", len(cfg))
 
 	// change to the pipeline file's directory
-	pipelineDir := filepath.Dir(*pipelineFile)
+	pipelineDir := filepath.Dir(pipelineFile)
 	if pipelineDir != "." {
 		verb.Printf("Changing current directory to: %s\n", pipelineDir)
 	}
@@ -60,7 +77,7 @@ func main() {
 
 	// Do what we're supposed to do
 	var exitCode int
-	if *clean {
+	if clean {
 		exitCode = DoClean(cfg, verb)
 	} else {
 		exitCode = DoBuild(cfg, verb)
@@ -114,22 +131,28 @@ func DoBuild(cfg ConfigFile, verb *log.Logger) int {
 	// Start all steps running
 	running := make([]*BuildStepInstance, 0, len(cfg))
 	wg := sync.WaitGroup{}
+
 	for _, step := range cfg {
 		verb.Printf("Starting step %s\n", step.Name)
+
 		one := NewBuildStepInst(step, targets.Seen, verb, broad)
 		running = append(running, one)
+
 		wg.Add(1)
-		go func() {
-			one.Run()
-			wg.Done()
-		}()
+		go func(inst *BuildStepInstance) {
+			defer wg.Done()
+			err := inst.Run()
+			if err != nil {
+				verb.Printf("%s: %s\n", inst.Step.Name, err.Error())
+			}
+		}(one)
 	}
 
 	// TODO: need a watchdog - look for hung steps, look for sitautions where build can't finish, etc
 
 	// Wait for them to complete
 	wg.Wait()
-	broad.Kill() //TODO: this should probably be called by our watchdog above
+	broad.Kill() // this should probably be called by our watchdog above
 
 	// Determine and use exit code
 	failCount := 0

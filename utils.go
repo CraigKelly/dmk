@@ -111,3 +111,13 @@ func AnyMissing(files []string) (bool, error) {
 
 	return false, nil
 }
+
+// FirstFileFound returns the first file that exists
+func FirstFileFound(files ...string) string {
+	for _, f := range files {
+		if s, err := os.Stat(f); err == nil && s != nil && !s.IsDir() {
+			return f
+		}
+	}
+	return ""
+}

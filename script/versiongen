@@ -1,0 +1,49 @@
+#!/usr/bin/env python3
+
+"""Simple version go generation for our project."""
+
+import inspect
+import os
+import datetime
+
+pth = os.path
+
+
+FILE_PATH = inspect.getabsfile(lambda i: i)
+SCRIPT_DIR = pth.dirname(FILE_PATH)
+
+
+def rel_path(rel):
+    """Return a path relative to this script's dir."""
+    return pth.abspath(pth.join(SCRIPT_DIR, rel))
+
+
+TEMPLATE = """
+package main
+
+// Version returns the current version string for this package - it is
+// generated from the file VERSION in the root of the repository
+func Version() string {
+    return "%s (built %s)"
+}
+""".lstrip()
+
+
+def main():
+    """Entry point."""
+    os.chdir(rel_path(".."))
+
+    with open("VERSION", "r") as f:
+        ver = f.read().strip()
+    if not ver:
+        ver = "UNKNOWN VERSION"
+
+    with open("version.go", "w") as f:
+        f.write(TEMPLATE % (
+            ver,
+            datetime.datetime.now().ctime()
+        ))
+
+
+if __name__ == "__main__":
+    main()
