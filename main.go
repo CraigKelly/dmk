@@ -9,6 +9,13 @@ import (
 	"sync"
 )
 
+// TODO: should be able to run a command by step name - only that step and
+//       it's dependencies should run. Be sure to work with the -c switch
+
+// TODO: should be able to mark a command to require specification by name,
+//       so that clean or building does not happen by default when no step
+//       is specified
+
 /////////////////////////////////////////////////////////////////////////////
 // Entry point
 
@@ -148,11 +155,9 @@ func DoBuild(cfg ConfigFile, verb *log.Logger) int {
 		}(one)
 	}
 
-	// TODO: need a watchdog - look for hung steps, look for sitautions where build can't finish, etc
-
 	// Wait for them to complete
 	wg.Wait()
-	broad.Kill() // this should probably be called by our watchdog above
+	broad.Kill()
 
 	// Determine and use exit code
 	failCount := 0
