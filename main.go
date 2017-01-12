@@ -16,6 +16,8 @@ import (
 //       so that clean or building does not happen by default when no step
 //       is specified
 
+// TODO: $INPUTS and $OUTPUTS should be defined for use by the command
+
 /////////////////////////////////////////////////////////////////////////////
 // Entry point
 
