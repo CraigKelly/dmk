@@ -5,6 +5,7 @@ cover.out
 debug
 debug.test
 res/*.txt
+res/*.output
 
 # Compiled Object files, Static and Dynamic libs (Shared Objects)
 *.o

@@ -73,16 +73,18 @@ func main() {
 	pcheck(err)
 	verb.Printf("Read %d bytes from %s\n", len(cfgText), pipelineFile)
 
-	cfg, err := ReadConfig(cfgText)
-	pcheck(err)
-	verb.Printf("Found %d build steps", len(cfg))
-
-	// change to the pipeline file's directory
+	// Change to the pipeline file's directory: note that this must happen
+	// before we parse the config file for globbing to work
 	pipelineDir := filepath.Dir(pipelineFile)
 	if pipelineDir != "." {
 		verb.Printf("Changing current directory to: %s\n", pipelineDir)
 	}
 	pcheck(os.Chdir(pipelineDir))
+
+	// Parse the config file
+	cfg, err := ReadConfig(cfgText)
+	pcheck(err)
+	verb.Printf("Found %d build steps", len(cfg))
 
 	// Do what we're supposed to do
 	var exitCode int

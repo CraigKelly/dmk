@@ -3,7 +3,9 @@ package main
 import (
 	"log"
 	"os"
+	"path/filepath"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -120,4 +122,31 @@ func FirstFileFound(files ...string) string {
 		}
 	}
 	return ""
+}
+
+// MultiGlob returns an array of files matching the given patterns in sorted
+// order with duplicates removed. If a pattern does not appear to be a pattern
+// it is added to the returned list of strings. Whitespace-only and empty
+// strings are ignored.
+func MultiGlob(patterns []string) ([]string, error) {
+	found := NewUniqueStrings()
+
+	for _, p := range patterns {
+		if len(strings.TrimSpace(p)) < 1 {
+			continue // no whitespace only (or empty) strings
+		}
+		if !strings.ContainsAny(p, "*?[]") {
+			found.Add(p) // Not a pattern
+			continue
+		}
+		globbed, err := filepath.Glob(p)
+		if err != nil {
+			return []string{}, err // Whoops
+		}
+		for _, g := range globbed {
+			found.Add(g)
+		}
+	}
+
+	return found.Strings(), nil
 }

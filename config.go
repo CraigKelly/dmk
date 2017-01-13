@@ -1,10 +1,6 @@
 package main
 
-import (
-	"gopkg.in/yaml.v2"
-)
-
-// TODO: allow globbing - each entry in Inputs, Outputs, and Clean can be a glob pattern
+import "gopkg.in/yaml.v2"
 
 // ConfigFile represents all the data read from a config file
 type ConfigFile map[string]*BuildStep
@@ -27,9 +23,21 @@ func ReadConfig(fileContent []byte) (ConfigFile, error) {
 		return nil, err
 	}
 
-	// Manually set build step name
+	// Perform post-parse-processing (the dreaded triple P!)
 	for name, step := range cfg {
+		// Manually set build step name
 		step.Name = name
+		// We allow globbing for inputs and clean
+		if i, e := MultiGlob(step.Inputs); err == nil {
+			step.Inputs = i
+		} else {
+			return nil, e
+		}
+		if c, e := MultiGlob(step.Clean); e == nil {
+			step.Clean = c
+		} else {
+			return nil, e
+		}
 	}
 
 	return cfg, nil

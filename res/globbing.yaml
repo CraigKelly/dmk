@@ -1,0 +1,17 @@
+# Proof of concept for globbing
+
+multigen:
+    command: touch a.txt b.txt c.txt
+    outputs:
+        - a.txt
+        - b.txt
+        - c.txt
+    clean:
+        - "*.extra.txt"
+
+globbed:
+    command: touch final.output
+    inputs:
+        - "*.txt"
+    outputs:
+        - final.output
