@@ -11,11 +11,12 @@ type ConfigFile map[string]*BuildStep
 
 // BuildStep is a single step in a ConfigFile
 type BuildStep struct {
-	Name    string   // Set after parsing (not in config file)
-	Command string   `yaml:"command"`
-	Inputs  []string `yaml:"inputs"`
-	Outputs []string `yaml:"outputs"`
-	Clean   []string `yaml:"clean"`
+	Name     string   // Set after parsing (not in config file)
+	Command  string   `yaml:"command"`
+	Inputs   []string `yaml:"inputs"`
+	Outputs  []string `yaml:"outputs"`
+	Clean    []string `yaml:"clean"`
+	Explicit bool     `yaml:"explicit"`
 }
 
 // ReadConfig parses and returns the contents of the config file (or an error)
@@ -92,6 +93,19 @@ func TrimSteps(cfg ConfigFile, reqStepNames []string) (ConfigFile, error) {
 	newCfg := ConfigFile{}
 	for name := range reqSteps {
 		newCfg[name] = cfg[name]
+	}
+
+	return newCfg, nil
+}
+
+// NoExplicit returns a copy of the config file with all explicit=true steps
+// removed.
+func NoExplicit(cfg ConfigFile) (ConfigFile, error) {
+	newCfg := ConfigFile{}
+	for name, step := range cfg {
+		if !step.Explicit {
+			newCfg[name] = cfg[name]
+		}
 	}
 
 	return newCfg, nil

@@ -104,3 +104,40 @@ func TestTrimConfig(t *testing.T) {
 	// Straight line dep graph
 	assertSteps(assert, cfg, []string{"pathb3"}, "pathb1", "pathb2", "pathb3")
 }
+
+func TestExplicitOnly(t *testing.T) {
+	assert := assert.New(t)
+
+	var err error
+
+	cfgText, err := ioutil.ReadFile("res/test.Pipeline")
+	pcheck(err)
+	cfg, err := ReadConfig(cfgText)
+	pcheck(err)
+	assert.Len(cfg, 3)
+
+	var newCfg ConfigFile
+
+	newCfg, err = NoExplicit(cfg)
+	assert.NoError(err)
+	assert.Len(newCfg, 3)
+
+	cfg["depstep"].Explicit = true
+
+	newCfg, err = NoExplicit(cfg)
+	assert.NoError(err)
+	assert.Len(newCfg, 2)
+	newCfg, err = NoExplicit(newCfg)
+	assert.NoError(err)
+	assert.Len(newCfg, 2)
+
+	newCfg["step1"].Explicit = true
+	newCfg["step2"].Explicit = true
+
+	newCfg, err = NoExplicit(cfg)
+	assert.NoError(err)
+	assert.Len(newCfg, 0)
+	newCfg, err = NoExplicit(newCfg)
+	assert.NoError(err)
+	assert.Len(newCfg, 0)
+}

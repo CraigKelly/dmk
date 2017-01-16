@@ -9,10 +9,6 @@ import (
 	"sync"
 )
 
-// TODO: should be able to mark a command to require specification by name,
-//       so that clean or building does not happen by default when no step
-//       is specified
-
 // TODO: $INPUTS and $OUTPUTS should be defined for use by the command
 
 /////////////////////////////////////////////////////////////////////////////
@@ -89,6 +85,12 @@ func main() {
 	if args != nil && len(args) > 0 {
 		verb.Printf("Steps specified on command line: trimming for %v\n", args)
 		newCfg, err = TrimSteps(cfg, args)
+		pcheck(err)
+		cfg = newCfg
+		verb.Printf("%d build steps remaining", len(cfg))
+	} else {
+		verb.Printf("No steps specified: removing steps where explicit=true\n")
+		newCfg, err = NoExplicit(cfg)
 		pcheck(err)
 		cfg = newCfg
 		verb.Printf("%d build steps remaining", len(cfg))

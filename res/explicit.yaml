@@ -1,0 +1,19 @@
+# Step that only runs if we name it
+disconnected:
+    command: "touch special.txt"
+    outputs: [special.txt]
+    explicit: true
+dischild:
+    command: "wc special.txt | tee special_report.txt"
+    inputs: [special.txt]
+    outputs: [special_report.txt]
+    explicit: true
+
+# command that usually run
+cmd1:
+    command: "touch c1.txt"
+    outputs: ["c1.txt"]
+cmd2:
+    command: "touch c2.txt"
+    inputs: ["c1.txt"]
+    outputs: ["c2.txt"]

@@ -50,6 +50,8 @@ For each command in a pipeline, you need to supply:
 * The outputs generated
 * (*Optionally*) a list of intermediate files that `clean` process can delete
   (see below for cleaning)
+* (*Optionally*) a flag indicated if the step must only run if required by an
+  explicit command
 
 The file is generally named `Pipeline` or `pipeline.yaml`. If you do not
 specify a pipeline file with the `-f` command line parameter, `dmk` looks for
@@ -104,6 +106,9 @@ step should specify:
   **ignored** for outputs.
 * _clean_ - A list of files to clean. These and outputs are the files deleted
   during a clean. You may use glob patterns for these.
+* _explicit_ - Optional, default to false. If set to true, the step will
+  run if you specify it on the command line, _or if it is required_ by a step
+  that you specified on the command line.
 
 The `res` subdirectory contains sample Pipeline files (used for testing), but
 a quick example would look like:
