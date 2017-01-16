@@ -9,9 +9,6 @@ import (
 	"sync"
 )
 
-// TODO: should be able to run a command by step name - only that step and
-//       it's dependencies should run. Be sure to work with the -c switch
-
 // TODO: should be able to mark a command to require specification by name,
 //       so that clean or building does not happen by default when no step
 //       is specified
@@ -34,6 +31,7 @@ func main() {
 
 	clean := *cleanSpec
 	verbose := *verboseSpec
+	args := flags.Args()
 
 	// If they didn't select a pipeline file, we try to find a default
 	var pipelineFile string
@@ -86,6 +84,16 @@ func main() {
 	pcheck(err)
 	verb.Printf("Found %d build steps", len(cfg))
 
+	// Figure out the steps that need to run
+	var newCfg ConfigFile
+	if args != nil && len(args) > 0 {
+		verb.Printf("Steps specified on command line: trimming for %v\n", args)
+		newCfg, err = TrimSteps(cfg, args)
+		pcheck(err)
+		cfg = newCfg
+		verb.Printf("%d build steps remaining", len(cfg))
+	}
+
 	// Do what we're supposed to do
 	var exitCode int
 	if clean {
@@ -93,6 +101,7 @@ func main() {
 	} else {
 		exitCode = DoBuild(cfg, verb)
 	}
+
 	os.Exit(exitCode)
 }
 
@@ -134,6 +143,7 @@ func DoBuild(cfg ConfigFile, verb *log.Logger) int {
 			targets.Add(file)
 		}
 	}
+	verb.Printf("BUILD: total possible outputs = %d\n", len(targets.Seen))
 
 	// We need a broadcaster for dependency notifications
 	broad := NewBroadcaster()

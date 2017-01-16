@@ -1,0 +1,35 @@
+# step unrelated to the two dep chains below
+disconnected:
+    command: "sanitycheck"
+    inputs: [nonei.txt]
+    outputs: [noneo.txt]
+
+# diamond pattern dep graph
+patha1:
+    command: "parent1"
+    outputs: ["a1.txt"]
+patha2a:
+    command: "child1"
+    inputs: ["a1.txt"]
+    outputs: ["a2a.txt"]
+patha2b:
+    command: "child2"
+    inputs: ["a1.txt"]
+    outputs: ["a2b.txt"]
+patha3a:
+    command: "grandchild"
+    inputs: ["a2a.txt", "a2b.txt"]
+    outputs: ["alldonea.txt"]
+
+# straight line dep graph
+pathb1:
+    command: "parent1"
+    outputs: ["b1.txt"]
+pathb2:
+    command: "child1"
+    inputs: ["b1.txt"]
+    outputs: ["b2.txt"]
+pathb3:
+    command: "grandchild"
+    inputs: ["b2.txt"]
+    outputs: ["alldoneb.txt"]

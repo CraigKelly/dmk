@@ -45,3 +45,62 @@ func TestConfigFileRead(t *testing.T) {
 	assert.Equal([]string{"combination.output"}, depstep.Outputs)
 	assert.Equal([]string{"need-cleaning.1", "need-cleaning.2", "need-cleaning.3"}, depstep.Clean)
 }
+
+func assertSteps(assert *assert.Assertions, cfg ConfigFile, req []string, steps ...string) {
+	newCfg, err := TrimSteps(cfg, req)
+	assert.NoError(err)
+
+	gather := NewUniqueStrings()
+	for s := range newCfg {
+		gather.Add(s)
+	}
+	actual := gather.Strings()
+
+	expected := make([]string, 0, len(actual)+1)
+	for _, s := range steps {
+		expected = append(expected, s)
+	}
+
+	assert.Equal(expected, actual)
+}
+
+func TestTrimConfig(t *testing.T) {
+	assert := assert.New(t)
+
+	cfgText, err := ioutil.ReadFile("res/trimming.yaml")
+	pcheck(err)
+	cfg, err := ReadConfig(cfgText)
+	pcheck(err)
+	assert.NotEmpty(cfg)
+	assert.Len(cfg, 8)
+
+	allSteps := []string{
+		"disconnected",
+		"patha1", "patha2a", "patha2b", "patha3a",
+		"pathb1", "pathb2", "pathb3",
+	}
+
+	// NOP trimming should succeed
+	assertSteps(assert, cfg, allSteps, allSteps...)
+	assertSteps(assert, cfg, []string{}, []string{}...)
+
+	// Error because step is missing
+	_, err = TrimSteps(cfg, []string{"step-not-there"})
+	assert.Error(err)
+
+	// Check easiest possible - disconnected step
+	assertSteps(assert, cfg, []string{"disconnected"}, "disconnected")
+
+	// Single steps
+	assertSteps(assert, cfg, []string{"patha1"}, "patha1")
+	assertSteps(assert, cfg, []string{"pathb1"}, "pathb1")
+
+	// get all steps from min leaves
+	assertSteps(assert, cfg, []string{"disconnected", "patha3a", "pathb3"}, allSteps...)
+
+	// Diamond dep graph
+	assertSteps(assert, cfg, []string{"patha3a"}, "patha1", "patha2a", "patha2b", "patha3a")
+
+	// Straight line dep graph
+	assertSteps(assert, cfg, []string{"pathb3"}, "pathb1", "pathb2", "pathb3")
+}

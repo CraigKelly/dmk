@@ -1,6 +1,10 @@
 package main
 
-import "gopkg.in/yaml.v2"
+import (
+	"fmt"
+
+	"gopkg.in/yaml.v2"
+)
 
 // ConfigFile represents all the data read from a config file
 type ConfigFile map[string]*BuildStep
@@ -41,4 +45,54 @@ func ReadConfig(fileContent []byte) (ConfigFile, error) {
 	}
 
 	return cfg, nil
+}
+
+// TrimSteps removes all steps except the ones given and their dependencies
+// via a copy-and-return (the config file passed in is unchanged)
+func TrimSteps(cfg ConfigFile, reqStepNames []string) (ConfigFile, error) {
+	// Find our initial steps and their dependencies
+	reqSteps := make(map[string]bool)
+	reqDeps := make(map[string]bool)
+
+	for _, s := range reqStepNames {
+		if _, inMap := cfg[s]; !inMap {
+			return nil, fmt.Errorf("%s is not in the pipeline file", s)
+		}
+		reqSteps[s] = true
+		for _, dep := range cfg[s].Inputs {
+			reqDeps[dep] = true
+		}
+	}
+
+	// Keeping adding steps our deps require until we can't add no more
+	foundCount := len(reqSteps)
+	for {
+		// Add new deps
+		for name, step := range cfg {
+			if _, inMap := reqSteps[name]; inMap {
+				continue // already seen this one
+			}
+			for _, dep := range step.Outputs {
+				if _, inMap := reqDeps[dep]; inMap {
+					reqSteps[name] = true // New dependency
+					for _, prevDep := range step.Inputs {
+						reqDeps[prevDep] = true // Get anythiung the new dep needs
+					}
+				}
+			}
+		}
+
+		if len(reqSteps) <= foundCount {
+			break // Nothing found in our iteration
+		}
+		foundCount = len(reqSteps)
+	}
+
+	// Now copy only the steps to keep
+	newCfg := ConfigFile{}
+	for name := range reqSteps {
+		newCfg[name] = cfg[name]
+	}
+
+	return newCfg, nil
 }
