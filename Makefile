@@ -22,6 +22,7 @@ $(VERSIONOUT): $(VERSIONIN)
 
 clean:
 	rm -f $(BINARY) debug debug.test cover.out $(TESTED) $(VERSIONOUT)
+	$(TOOLDIR)/versiongen
 
 test: $(TESTED) $(TESTRESOURCES)
 $(TESTED): $(SOURCES) $(VERSIONOUT)
