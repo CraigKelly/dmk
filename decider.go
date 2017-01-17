@@ -18,6 +18,15 @@ func (td TimeDecider) NeedBuild(inputs []string, outputs []string) (bool, error)
 		return false, errors.New("Nothing to build")
 	}
 
+	if missing, err := AnyMissing(inputs); missing || err != nil {
+		// If there was an error or we couldn't find the inputs, then we can't
+		// build anything (missing deps)
+		if err != nil {
+			return true, err
+		}
+		return true, errors.New("Missing a dependency: cannot build")
+	}
+
 	if missing, err := AnyMissing(outputs); missing || err != nil {
 		// Either we have an output missing or an error: either way we're done
 		return missing, err

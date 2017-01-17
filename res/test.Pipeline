@@ -1,6 +1,6 @@
 # A simple test build file with two indendent steps and a final step that
 # depends on them. Note that the commands are NOT supposed to exist so that
-# this build file will fail when run (although a clean would success)
+# this build file will fail when run (although a clean would succeed)
 
 step1:
     command: "xformxyz i{1,2,3}.txt"

@@ -17,6 +17,7 @@ import (
 func main() {
 	log.SetFlags(0)
 	log.Printf("dmk %s\n", Version())
+	os.Setenv("DMK_VERSION", Version())
 
 	flags := flag.NewFlagSet("twivility", flag.ExitOnError)
 	pipelineFileSpec := flags.String("f", "", "Pipeline file name")
@@ -66,6 +67,12 @@ func main() {
 	}
 	pcheck(err)
 	verb.Printf("Read %d bytes from %s\n", len(cfgText), pipelineFile)
+
+	// Before we change directory, go ahead save the absolute path of the
+	// pipeline file in the environment
+	absPipelineFile, err := filepath.Abs(pipelineFile)
+	pcheck(err)
+	os.Setenv("DMK_PIPELINE", absPipelineFile)
 
 	// Change to the pipeline file's directory: note that this must happen
 	// before we parse the config file for globbing to work

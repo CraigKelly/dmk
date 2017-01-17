@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -128,10 +129,20 @@ func (i *BuildStepInstance) Run() error {
 	log.Printf("%s: %s\n", i.Step.Name, i.Step.Command)
 
 	cmd := exec.Command("/bin/bash", "-c", i.Step.Command)
+
+	env := os.Environ()
+	env = append(env, fmt.Sprintf("DMK_STEPNAME=%s", i.Step.Name))
+	env = append(env, fmt.Sprintf("DMK_INPUTS=%v", strings.Join(i.Step.Inputs, ":")))
+	env = append(env, fmt.Sprintf("DMK_OUTPUTS=%v", strings.Join(i.Step.Outputs, ":")))
+	env = append(env, fmt.Sprintf("DMK_CLEAN=%v", strings.Join(i.Step.Clean, ":")))
+	cmd.Env = env
+
 	var stdOut bytes.Buffer
 	cmd.Stdout = &stdOut
+
 	var stdErr bytes.Buffer
 	cmd.Stderr = &stdErr
+
 	cmdErr := cmd.Run()
 
 	stdoutText := strings.TrimSpace(stdOut.String())

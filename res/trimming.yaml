@@ -1,3 +1,5 @@
+# Note that this file can't really run (unless run in clean mode)
+
 # step unrelated to the two dep chains below
 disconnected:
     command: "sanitycheck"

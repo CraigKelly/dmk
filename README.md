@@ -142,6 +142,14 @@ depstep:                              # third/final step: it won't run until the
         - combination.output
     clean:
         - need-cleaning.*             # An example of using a glob pattern
+
+extrastep:
+    command: special-command
+    inputs:
+        - some-script-file.txt
+    outputs:
+        - my-special-file.extra
+    explicit: true                    # Only run if specified on command line
 ````
 
 ## Building
@@ -154,7 +162,24 @@ build tool for the job.
 In addition to `go`, `godep`, and `make`, you should also have Python 3
 installed (for `script/update` and for the test script `res/slow`)
 
+## Build step environment
+
+When a build step is executed, a number of environment variables are set that
+may be used by the step:
+
+* DMK_VERSION - version string for dmk
+* DMK_PIPELINE - absolute path to the pipeline file being executed
+* DMK_STEPNAME - the name of the current step
+* DMK_INPUTS - a colon (":") delimited list of inputs for this step
+* DMK_OUTPUTS - a colon (":") delimited list of outputs for this step
+* DMK_CLEAN - a colon (":") delimited list of extra clean files for this step
+
 ## Some helpful hints to remember
+
+A pipeline file is just a YAML document, and a **JSON** document is valid YAML.
+For instance, `res/slowbuild.yaml` and `res/slowbuild.json` are equivalent
+pipeline files. If you need a customized build, you can generate the pipeline
+file in the language of your choice in JSON or YAML and then call `dmk`.
 
 Commands are executed in a new bash shell (which also means you need bash).
 
