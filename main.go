@@ -9,8 +9,6 @@ import (
 	"sync"
 )
 
-// TODO: $INPUTS and $OUTPUTS should be defined for use by the command
-
 /////////////////////////////////////////////////////////////////////////////
 // Entry point
 

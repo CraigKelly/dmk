@@ -2,8 +2,6 @@ package main
 
 import "time"
 
-// TODO: move to sub-package and then give better names
-
 // BroadcastMsg is WHAT is broadcast
 type BroadcastMsg struct {
 	CreateTime time.Time
