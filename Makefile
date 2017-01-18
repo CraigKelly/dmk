@@ -19,6 +19,7 @@ install: build
 version: $(VERSIONOUT)
 $(VERSIONOUT): $(VERSIONIN)
 	$(TOOLDIR)/versiongen
+	go fmt $(VERSIONOUT)
 
 clean:
 	rm -f $(BINARY) debug debug.test cover.out $(TESTED) $(VERSIONOUT)
