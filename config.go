@@ -11,12 +11,13 @@ type ConfigFile map[string]*BuildStep
 
 // BuildStep is a single step in a ConfigFile
 type BuildStep struct {
-	Name     string   // Set after parsing (not in config file)
-	Command  string   `yaml:"command"`
-	Inputs   []string `yaml:"inputs"`
-	Outputs  []string `yaml:"outputs"`
-	Clean    []string `yaml:"clean"`
-	Explicit bool     `yaml:"explicit"`
+	Name      string   // Set after parsing (not in config file)
+	Command   string   `yaml:"command"`
+	Inputs    []string `yaml:"inputs"`
+	Outputs   []string `yaml:"outputs"`
+	Clean     []string `yaml:"clean"`
+	Explicit  bool     `yaml:"explicit"`
+	DelOnFail bool     `yaml:"delOnFail"`
 }
 
 // ReadConfig parses and returns the contents of the config file (or an error)

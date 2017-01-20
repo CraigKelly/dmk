@@ -188,6 +188,7 @@ func DoBuild(cfg ConfigFile, verb *log.Logger) int {
 			successCount++
 		} else if step.State == buildFailed {
 			failCount++
+			DeleteFailed(step.Step) // Remove any outputs on fail
 		}
 	}
 	if failCount+successCount < len(running) {
@@ -195,4 +196,19 @@ func DoBuild(cfg ConfigFile, verb *log.Logger) int {
 		failCount = failCount + successCount + 1
 	}
 	return failCount
+}
+
+// DeleteFailed deletes the output for a failed step if necessary
+func DeleteFailed(step *BuildStep) {
+	if !step.DelOnFail {
+		return
+	}
+	for _, f := range step.Outputs {
+		err := os.RemoveAll(f)
+		if err == nil || !os.IsNotExist(err) {
+			log.Printf("%s: deleted %s\n", step.Name, f)
+		} else if err != nil {
+			log.Printf("%s: tried to delete %s but failed: %s\n", step.Name, f, err.Error())
+		}
+	}
 }

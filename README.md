@@ -109,6 +109,8 @@ step should specify:
 * _explicit_ - Optional, default to false. If set to true, the step will
   run if you specify it on the command line, _or if it is required_ by a step
   that you specified on the command line.
+* _delOnFail_ - Optional, default to false. If the step fails, all output files
+  will be deleted.
 
 The `res` subdirectory contains sample Pipeline files (used for testing), but
 a quick example would look like:
