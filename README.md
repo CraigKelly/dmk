@@ -27,7 +27,7 @@ files (including handling metapost and biblatex), look into `rubber`.
 This is *not* mean to replace a real automated build tool for a software
 project. As a general rule:
 
-* If you're build Go software, use the Go tools (and optionally make)
+* If you're building Go software, use the Go tools (and optionally make)
 * If you're building Java/Scala use `sbt`, `gradle`, `mvn`, `ant`, etc
 * If you're building .NET, erm, I'm not sure
 * There are great tools like `scons` that understand how to build lots of artifacts (including LaTeX docs)
@@ -48,10 +48,9 @@ For each command in a pipeline, you need to supply:
 * The actual command to run (in the shell)
 * The inputs required
 * The outputs generated
-* (*Optionally*) a list of intermediate files that `clean` process can delete
-  (see below for cleaning)
-* (*Optionally*) a flag indicated if the step must only run if required by an
-  explicit command
+
+This list is not exhaustive; see below for everything you can specify for a
+build step.
 
 The file is generally named `Pipeline` or `pipeline.yaml`. If you do not
 specify a pipeline file with the `-f` command line parameter, `dmk` looks for
@@ -61,8 +60,8 @@ the following names in the current directory (in order):
 * Pipeline.yaml
 * pipeline
 * pipeline.yaml
-* .Pipeline.Pipeline.yaml
-* .pipeline.pipeline.yaml
+* .Pipeline.yaml
+* .pipeline.yaml
 
 You may also supply a custom name with the `-f` command line flag. If the
 pipeline file is in a different directory, dmk will change to that directory
@@ -106,11 +105,12 @@ step should specify:
   **ignored** for outputs.
 * _clean_ - A list of files to clean. These and outputs are the files deleted
   during a clean. You may use glob patterns for these.
-* _explicit_ - Optional, default to false. If set to true, the step will
-  run if you specify it on the command line, _or if it is required_ by a step
-  that you specified on the command line.
-* _delOnFail_ - Optional, default to false. If the step fails, all output files
-  will be deleted.
+* _explicit_ - Optional, defaults to false. If set to true, the step will
+  run if you specify it on the command line. It will not run by default. Any steps
+  required by steps specified on the command line will also run, regardless of their
+  _explicit_ setting.
+* _delOnFail_ - Optional, defaults to false. If set to true and the step fails,
+  then `dmk` will delete all the step's output files.
 
 The `res` subdirectory contains sample Pipeline files (used for testing), but
 a quick example would look like:
@@ -132,18 +132,19 @@ step1:                                # first step
 
 step2:                                # second step
     command: cmd1xyz                  # note the lack of inputs - this means
-    outputs:                          # the step can run immediately, but will
-        - output.bin                  # ONLY run if an output is missing
+    outputs:                          # the step will run without waiting for
+        - output.bin                  # other steps to complete.
 
 depstep:                              # third/final step: it won't run until the
-    command: cmd2xyz                  # previous steps are finished because their
-    inputs:                           # outputs are specified in the this step's
-        - o3.txt                      # inputs.
+    command: cmd2xyz                  # previous steps finish because their
+    inputs:                           # outputs are in the this step's inputs.
+        - o3.txt                      
         - output.bin
     outputs:
         - combination.output
     clean:
         - need-cleaning.*             # An example of using a glob pattern
+    delOnFail: true
 
 extrastep:
     command: special-command
@@ -151,8 +152,35 @@ extrastep:
         - some-script-file.txt
     outputs:
         - my-special-file.extra
-    explicit: true                    # Only run if specified on command line
+    explicit: true                    # Run if specified on command line (and not by default)
 ````
+
+If you were to run `dmk -c` then it would deleted the following files:
+
+* o1.txt, o2.txt, o3.txt, a.aux, and b.log because of `step1`
+*  because of the `clean` list in `step1`
+* output.bin because of `step2`
+* combination.output and any files matching the pattern `need-cleaning.*` because of `depstep`
+
+Note that my-special-file.extra from `extrastep` is not deleted unless you specify
+`extrastep` on the command line.
+
+After cleaning, if you run `dmk` the following steps would occur:
+
+* The commands from `step1` (`xformxyz i{1,2,3}.txt`) and `step2` (`cmd1xyz`)
+  would run
+* When they were both finished, `depstep` would start and `cmd2xyz` would run.
+* As before, `extrastep` would NOT run.
+* If the `depstep` command (`cmd2xyz`) fails, then `dmk` will delete
+  `combination.output` (if it exists).
+* If all the steps succeed, running `dmk` again would not cause
+  any command to run (because all outputs are newer than their steps' inputs).
+
+If you were to run `dmk extrastep` then the command `special-command` would run.
+Nothing else would run.
+
+If you were to run `dmk extrastep depstep` then all steps would run (because
+`step1` and `step2` are `depstep` dependencies).
 
 ## Building
 
@@ -161,32 +189,35 @@ worry about this if you are building with the `Makefile`. Also note the
 fact that we use `make` to build `dmk`. We are serious about using the correct
 build tool for the job.
 
-In addition to `go`, `godep`, and `make`, you should also have Python 3
-installed (for `script/update` and for the test script `res/slow`)
+You should also have Python 3 installed (for `script/update` and for the test
+script `res/slow`).
 
 ## Build step environment
 
-When a build step is executed, a number of environment variables are set that
-may be used by the step:
+When a build step runs, `dmk` sets environment variables in the step command's
+process:
 
 * DMK_VERSION - version string for dmk
-* DMK_PIPELINE - absolute path to the pipeline file being executed
+* DMK_PIPELINE - absolute path to the pipeline file running
 * DMK_STEPNAME - the name of the current step
 * DMK_INPUTS - a colon (":") delimited list of inputs for this step
 * DMK_OUTPUTS - a colon (":") delimited list of outputs for this step
 * DMK_CLEAN - a colon (":") delimited list of extra clean files for this step
 
+Also note that because `bash` evaluates the command, you can use the
+environment variables in the command itself. E.g. `mycmd --inputs $DMK_INPUTS`
+
 ## Some helpful hints to remember
 
-A pipeline file is just a YAML document, and a **JSON** document is valid YAML.
-For instance, `res/slowbuild.yaml` and `res/slowbuild.json` are equivalent
-pipeline files. If you need a customized build, you can generate the pipeline
-file in the language of your choice in JSON or YAML and then call `dmk`.
+A pipeline file is a YAML document, and a **JSON** document is valid YAML. For
+instance, `res/slowbuild.yaml` and `res/slowbuild.json` are semantically
+identical pipeline files. If you need a customized build, you can generate the
+pipeline file in the language of your choice in JSON or YAML and then call
+`dmk`.
 
-Commands are executed in a new bash shell (which also means you need bash).
+Commands run in a new bash shell (which also means you need bash).
 
-File names are assumed to be relative to the Pipeline file. The current working
-directory is changed to the same directory as the Pipeline file before anything
-is done.
+`dmk` changes to the directory of the Pipeline file, so you can specify file
+names relative to the Pipeline file's directory.
 
-You may use globbing patterns for the inputs and clean
+You may use globbing patterns for the inputs and clean.
