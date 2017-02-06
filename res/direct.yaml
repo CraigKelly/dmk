@@ -1,0 +1,27 @@
+# just to create deps for showenv below
+createdeps:
+    command: "touch i.txt"
+    outputs: ["i.txt"]
+
+# just show environment variables
+showenv:
+    command: "env | grep DMK_ | tee env.txt"
+    direct: true
+    inputs:
+        - i.txt
+    clean:
+        - cfirst.txt
+        - spaces in my file.txt
+        - clast.txt
+    outputs:
+        - env.txt
+
+# some output work that happens over time
+timed:
+    command: "sleep 1 && echo I am here && sleep 1 && echo still here && rm -f env2.txt && touch env2.txt"
+    direct: true
+    inputs:
+        - env.txt
+    outputs:
+        - env2.txt
+

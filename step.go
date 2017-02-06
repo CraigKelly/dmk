@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -26,6 +27,31 @@ type BuildStepInstance struct {
 	verb    *log.Logger
 	decider Decider
 	broad   *Broadcaster
+}
+
+// Can be our stand in below OR bytes.buffer
+type stepOutput interface {
+	io.Writer
+	String() string
+}
+
+// Used in place of bytes.Buffer for direct output
+type directOutput struct {
+	dest io.Writer
+}
+
+func newDirectOutput(w io.Writer) *directOutput {
+	return &directOutput{
+		dest: w,
+	}
+}
+
+func (do *directOutput) Write(p []byte) (int, error) {
+	return do.dest.Write(p)
+}
+
+func (do *directOutput) String() string {
+	return ""
 }
 
 // NewBuildStepInst creates an unstarted instance from the BuildStep
@@ -137,11 +163,19 @@ func (i *BuildStepInstance) Run() error {
 	env = append(env, fmt.Sprintf("DMK_CLEAN=%v", strings.Join(i.Step.Clean, ":")))
 	cmd.Env = env
 
-	var stdOut bytes.Buffer
-	cmd.Stdout = &stdOut
+	var stdOut stepOutput
+	var stdErr stepOutput
 
-	var stdErr bytes.Buffer
-	cmd.Stderr = &stdErr
+	if i.Step.Direct {
+		stdOut = newDirectOutput(os.Stdout)
+		stdErr = newDirectOutput(os.Stderr)
+	} else {
+		stdOut = &bytes.Buffer{}
+		stdErr = &bytes.Buffer{}
+	}
+
+	cmd.Stdout = stdOut
+	cmd.Stderr = stdErr
 
 	cmdErr := cmd.Run()
 

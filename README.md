@@ -111,6 +111,12 @@ step should specify:
   _explicit_ setting.
 * _delOnFail_ - Optional, defaults to false. If set to true and the step fails,
   then `dmk` will delete all the step's output files.
+* _direct_ - Optional, default to false. If set to true, both stdout and stderr
+  from the stepis written to the `dmk` process standard streams. If set to false
+  (the default), stdout and stderr are written in single blocks after the step
+  completes (stdout is only written if `dmk` is running in *verbose* mode).
+  Note in *direct* mode (direct=True), step output may be intereaved with
+  "normal" output when steps are running in parallel!
 
 The `res` subdirectory contains sample Pipeline files (used for testing), but
 a quick example would look like:

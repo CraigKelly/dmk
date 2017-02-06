@@ -18,6 +18,7 @@ type BuildStep struct {
 	Clean     []string `yaml:"clean"`
 	Explicit  bool     `yaml:"explicit"`
 	DelOnFail bool     `yaml:"delOnFail"`
+	Direct    bool     `yaml:"direct"`
 }
 
 // ReadConfig parses and returns the contents of the config file (or an error)
