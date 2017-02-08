@@ -1,0 +1,10 @@
+# just to create deps for showenv below
+longcmd:
+    command: >
+        (seq 10 && seq 10)
+        | shuf
+        | sort -n
+        | uniq
+        | tee i.txt
+    direct: true
+    outputs: ["i.txt"]

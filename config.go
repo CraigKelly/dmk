@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 )
@@ -34,6 +35,8 @@ func ReadConfig(fileContent []byte) (ConfigFile, error) {
 	for name, step := range cfg {
 		// Manually set build step name
 		step.Name = name
+		// Trim any whitespace from the command so they can use YAML multi-line
+		step.Command = strings.TrimSpace(step.Command)
 		// We allow globbing for inputs and clean
 		if i, e := MultiGlob(step.Inputs); err == nil {
 			step.Inputs = i
