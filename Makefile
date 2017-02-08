@@ -3,7 +3,6 @@ TOOLDIR=$(BASEDIR)/script
 
 BINARY=dmk
 SOURCES := $(shell find $(BASEDIR) -name '*.go')
-SCRIPTS := $(shell find $(TOOLDIR) -type f)
 TESTRESOURCES := $(shell find '$(BASEDIR)/res' -type f)
 TESTED=.tested
 VERSIONIN=VERSION
