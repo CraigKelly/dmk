@@ -198,8 +198,13 @@ build tool for the job.
 You should also have Python 3 installed (for `script/update` and for the test
 script `res/slow`).
 
-## Build step environment
+`make dist` will build cross-platform binaries in `./dist`. Yes, we commit them
+to the repo. Deal with it, they're small.
 
+`make release` handles tagging and pushing to GitHub.
+
+## Build step environment
+11
 When a build step runs, `dmk` sets environment variables in the step command's
 process:
 
