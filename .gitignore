@@ -1,6 +1,7 @@
 # Specific to this project
 .tested
 dmk
+dmk.exe
 cover.out
 debug
 debug.test

@@ -13,7 +13,7 @@ function one_dist() {
     echo "Building dist for $GOOS-$GOARCH"
     mkdir -p "./dist/$GOOS-$GOARCH"
     go build -v .
-    mv dmk.* "./dist/$GOOS-$GOARCH/"
+    mv dmk* "./dist/$GOOS-$GOARCH/"
 }
 
 one_dist darwin 386
