@@ -20,7 +20,7 @@
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v2",
-			"Rev": "4c78c975fe7c825c6d1466c42be594d1d6f3aba6"
+			"Rev": "a5b47d31c556af34a302ce5d659e6fea44d90de0"
 		},
 		{
 			"ImportPath": "github.com/stretchr/testify/vendor/github.com/davecgh/go-spew/spew",
