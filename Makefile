@@ -37,7 +37,10 @@ cover: $(SOURCES) $(VERSIONOUT)
 update: clean
 	$(TOOLDIR)/update
 
-release: build
+dist: build
+	$(TOOLDIR)/dist
+
+release: build dist
 	$(TOOLDIR)/release
 
 .PHONY: clean test testv cover build run update version release

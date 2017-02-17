@@ -1,0 +1,24 @@
+#!/bin/bash
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$SCRIPT_DIR/.."
+
+rm -fr ./dist
+mkdir ./dist
+
+function one_dist() {
+    rm -f ./dmk ./dmk.exe
+    export GOOS=$1
+    export GOARCH=$2
+    echo "Building dist for $GOOS-$GOARCH"
+    mkdir -p "./dist/$GOOS-$GOARCH"
+    go build -v .
+    mv dmk.* "./dist/$GOOS-$GOARCH/"
+}
+
+one_dist darwin 386
+one_dist darwin amd64
+one_dist linux 386
+one_dist linux amd64
+one_dist windows 386
+one_dist windows amd64
