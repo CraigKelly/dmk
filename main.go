@@ -17,7 +17,7 @@ func main() {
 	log.Printf("dmk %s\n", Version())
 	os.Setenv("DMK_VERSION", Version())
 
-	flags := flag.NewFlagSet("twivility", flag.ExitOnError)
+	flags := flag.NewFlagSet("dmk", flag.ExitOnError)
 	pipelineFileSpec := flags.String("f", "", "Pipeline file name")
 	cleanSpec := flags.Bool("c", false, "Clean instead of build")
 	verboseSpec := flags.Bool("v", false, "verbose output")
