@@ -28,6 +28,16 @@ def all_deps():
         yield d
 
 
+def targets(deps):
+    """Generator that yields targets for updates."""
+    for dep in deps:
+        target = dep["ImportPath"]
+        if '/vendor/' in target:
+            print("Skipping: %s" % target)
+        else:
+            yield target
+
+
 def flush():
     """Flush and sync to keep everything straight."""
     sys.stdout.flush()
@@ -49,14 +59,21 @@ def main():
     """Entry point."""
     os.chdir(rel_path(".."))
 
+    pre_updates = [t for t in targets(all_deps())]
+    for target in pre_updates:
+        cmd("go get -u %s", target)
+
     cmd("godep save")
 
-    for dep in all_deps():
-        target = dep["ImportPath"]
-        if '/vendor/' in target:
-            print("Skipping: %s" % target)
-            continue
-        cmd("go get -u %s", target)
+    updates = [t for t in targets(all_deps())]
+
+    # Only need to go get stuff we missed before
+    skips = set(pre_updates)
+    for target in updates:
+        if target not in skips:
+            cmd("go get -u %s", target)
+
+    for target in updates:
         cmd("godep update %s", target)
 
     print("")
