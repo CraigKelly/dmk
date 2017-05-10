@@ -38,7 +38,7 @@ func ReadConfig(fileContent []byte) (ConfigFile, error) {
 		// Trim any whitespace from the command so they can use YAML multi-line
 		step.Command = strings.TrimSpace(step.Command)
 		// We allow globbing for inputs and clean
-		if i, e := MultiGlob(step.Inputs); err == nil {
+		if i, e := MultiGlob(step.Inputs); e == nil {
 			step.Inputs = i
 		} else {
 			return nil, e
