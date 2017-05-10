@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"gopkg.in/yaml.v2"
@@ -35,8 +36,10 @@ func ReadConfig(fileContent []byte) (ConfigFile, error) {
 	for name, step := range cfg {
 		// Manually set build step name
 		step.Name = name
+
 		// Trim any whitespace from the command so they can use YAML multi-line
 		step.Command = strings.TrimSpace(step.Command)
+
 		// We allow globbing for inputs and clean
 		if i, e := MultiGlob(step.Inputs); e == nil {
 			step.Inputs = i
@@ -47,6 +50,17 @@ func ReadConfig(fileContent []byte) (ConfigFile, error) {
 			step.Clean = c
 		} else {
 			return nil, e
+		}
+
+		// Expand any environment variables in input/clean/output
+		for i, t := range step.Inputs {
+			step.Inputs[i] = os.ExpandEnv(t)
+		}
+		for i, t := range step.Outputs {
+			step.Outputs[i] = os.ExpandEnv(t)
+		}
+		for i, t := range step.Clean {
+			step.Clean[i] = os.ExpandEnv(t)
 		}
 	}
 
