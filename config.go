@@ -8,6 +8,22 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+/* TODO: Base steps:
+
+    1. A step marks itself as something like abstract or template
+    2. "Actual" steps can list an abstract step as a base/template and will
+       receive its properties as a default
+    3. Every step gets a variable section where the vars get expanded. Eval
+       order will be step vars, then env vars, then globbing. Abstract steps
+       don't expand anything.
+    4. This means two new doc sections: variables and abstract steps.
+    5. Need really good testing for this stuff.
+    6. Examples for variables: the clean section for rubber/latex steps
+    7. Abstract steps would be handy for steps that are very similar (like
+       one step per csv file extracted from a data source)
+*/
+
+
 // ConfigFile represents all the data read from a config file
 type ConfigFile map[string]*BuildStep
 
