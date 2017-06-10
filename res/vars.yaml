@@ -1,0 +1,23 @@
+# Proof of concept for abstract steps with variables
+# TODO: actually create variable POC
+
+base:
+    abstract: true
+    explicit: false
+    delOnFail: true
+    direct: true
+    clean:
+        - extra.txt
+
+use_base:
+    baseStep: base
+    command: "echo USING BASE | tee use-base.txt"
+    outputs:
+        - use-base.txt
+    clean:
+        - also-extra.txt
+
+no_base:
+    command: "echo NO BASE | tee no-base.txt"
+    outputs:
+        - no-base.txt

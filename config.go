@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -10,19 +11,23 @@ import (
 
 /* TODO: Base steps:
 
-    1. A step marks itself as something like abstract or template
-    2. "Actual" steps can list an abstract step as a base/template and will
-       receive its properties as a default
-    3. Every step gets a variable section where the vars get expanded. Eval
-       order will be step vars, then env vars, then globbing. Abstract steps
-       don't expand anything.
-    4. This means two new doc sections: variables and abstract steps.
-    5. Need really good testing for this stuff.
-    6. Examples for variables: the clean section for rubber/latex steps
-    7. Abstract steps would be handy for steps that are very similar (like
-       one step per csv file extracted from a data source)
-*/
+UPDATED: We have abstract steps, now we need to create a POC in res/vars.yaml
+and actually handle variables
 
+   1. A step marks itself as something like abstract or template
+   2. "Actual" steps can list an abstract step as a base/template and will
+      receive its properties as a default
+   3. Every step gets a variable section where the vars get expanded. Eval
+      order will be step vars, then env vars, then globbing. Abstract steps
+      don't expand anything.
+   4. This means two new doc sections: variables and abstract steps.
+   5. Need really good testing for this stuff.
+   6. Examples for variables: the clean section for rubber/latex steps
+   7. Abstract steps would be handy for steps that are very similar (like
+      one step per csv file extracted from a data source)
+
+TODO: add some tests for abstract and vars yaml files
+*/
 
 // ConfigFile represents all the data read from a config file
 type ConfigFile map[string]*BuildStep
@@ -37,6 +42,8 @@ type BuildStep struct {
 	Explicit  bool     `yaml:"explicit"`
 	DelOnFail bool     `yaml:"delOnFail"`
 	Direct    bool     `yaml:"direct"`
+	Abstract  bool     `yaml:"abstract"`
+	BaseStep  string   `yaml:"baseStep"`
 }
 
 // ReadConfig parses and returns the contents of the config file (or an error)
@@ -48,6 +55,11 @@ func ReadConfig(fileContent []byte) (ConfigFile, error) {
 		return nil, err
 	}
 
+	cfg, abstractCfg, err := splitAbstractSteps(cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	// Perform post-parse-processing (the dreaded triple P!)
 	for name, step := range cfg {
 		// Manually set build step name
@@ -55,6 +67,24 @@ func ReadConfig(fileContent []byte) (ConfigFile, error) {
 
 		// Trim any whitespace from the command so they can use YAML multi-line
 		step.Command = strings.TrimSpace(step.Command)
+
+		// If this step has a base step, grab it's data
+		if len(step.BaseStep) > 0 {
+			abs, absok := abstractCfg[step.BaseStep]
+			if !absok {
+				return nil, errors.New("No abstract step named " + step.BaseStep)
+			}
+
+			// Copy properties that override
+			step.Explicit = abs.Explicit
+			step.DelOnFail = abs.DelOnFail
+			step.Direct = abs.Direct
+
+			// Append properties that just update
+			step.Inputs = append(step.Inputs, abs.Inputs...)
+			step.Outputs = append(step.Outputs, abs.Outputs...)
+			step.Clean = append(step.Clean, abs.Clean...)
+		}
 
 		// We allow globbing for inputs and clean
 		if i, e := MultiGlob(step.Inputs); e == nil {
@@ -144,4 +174,19 @@ func NoExplicit(cfg ConfigFile) (ConfigFile, error) {
 	}
 
 	return newCfg, nil
+}
+
+// splitAbstractSteps returns two config files: the main config with all
+// abstract steps removed and another with only the abstract steps
+func splitAbstractSteps(cfg ConfigFile) (norm ConfigFile, abstract ConfigFile, err error) {
+	norm = ConfigFile{}
+	abstract = ConfigFile{}
+	for name, step := range cfg {
+		if step.Abstract {
+			abstract[name] = cfg[name]
+		} else {
+			norm[name] = cfg[name]
+		}
+	}
+	return
 }
