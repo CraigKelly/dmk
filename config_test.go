@@ -57,9 +57,7 @@ func assertSteps(assert *assert.Assertions, cfg ConfigFile, req []string, steps 
 	actual := gather.Strings()
 
 	expected := make([]string, 0, len(actual)+1)
-	for _, s := range steps {
-		expected = append(expected, s)
-	}
+	expected = append(expected, steps...)
 
 	assert.Equal(expected, actual)
 }

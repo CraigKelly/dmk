@@ -15,7 +15,7 @@ import (
 func main() {
 	log.SetFlags(0)
 	log.Printf("dmk %s\n", Version())
-	os.Setenv("DMK_VERSION", Version())
+	pcheck(os.Setenv("DMK_VERSION", Version()))
 
 	flags := flag.NewFlagSet("dmk", flag.ExitOnError)
 	pipelineFileSpec := flags.String("f", "", "Pipeline file name")
@@ -70,7 +70,7 @@ func main() {
 	// pipeline file in the environment
 	absPipelineFile, err := filepath.Abs(pipelineFile)
 	pcheck(err)
-	os.Setenv("DMK_PIPELINE", absPipelineFile)
+	pcheck(os.Setenv("DMK_PIPELINE", absPipelineFile))
 
 	// Change to the pipeline file's directory: note that this must happen
 	// before we parse the config file for globbing to work
@@ -87,7 +87,7 @@ func main() {
 
 	// Figure out the steps that need to run
 	var newCfg ConfigFile
-	if args != nil && len(args) > 0 {
+	if len(args) > 0 {
 		verb.Printf("Steps specified on command line: trimming for %v\n", args)
 		newCfg, err = TrimSteps(cfg, args)
 		pcheck(err)

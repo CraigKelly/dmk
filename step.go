@@ -68,7 +68,7 @@ func NewBuildStepInst(step *BuildStep, allOutputs map[string]bool, verb *log.Log
 
 	// If verbose, output vars in sorted order
 	varKeys := []string{}
-	for k, _ := range step.Vars {
+	for k := range step.Vars {
 		varKeys = append(varKeys, k)
 	}
 	sort.Strings(varKeys)

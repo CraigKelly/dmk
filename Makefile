@@ -24,6 +24,9 @@ clean:
 	rm -f $(BINARY) debug debug.test cover.out $(TESTED) $(VERSIONOUT)
 	$(TOOLDIR)/versiongen
 
+format:
+	go fmt *.go
+
 test: $(TESTED) $(TESTRESOURCES)
 $(TESTED): $(SOURCES) $(VERSIONOUT)
 	$(TOOLDIR)/test

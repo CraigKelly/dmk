@@ -11,7 +11,7 @@ func TestBroadcastMultiListener(t *testing.T) {
 	assert := assert.New(t)
 
 	b := NewBroadcaster()
-	b.Start()
+	pcheck(b.Start())
 
 	wg := sync.WaitGroup{}
 	started := make(chan bool)
@@ -19,8 +19,8 @@ func TestBroadcastMultiListener(t *testing.T) {
 	stdRoutines := 1
 
 	for i := 0; i < stdRoutines; i++ {
+		wg.Add(1)
 		go func(num int) {
-			wg.Add(1)
 			defer wg.Done()
 
 			count := 0
@@ -40,13 +40,13 @@ func TestBroadcastMultiListener(t *testing.T) {
 		<-started
 	}
 
-	b.Send("Message A")
-	b.Send("Message B")
-	b.Send("Message C")
+	pcheck(b.Send("Message A"))
+	pcheck(b.Send("Message B"))
+	pcheck(b.Send("Message C"))
 
 	diffCount := make(chan int)
+	wg.Add(1)
 	go func() {
-		wg.Add(1)
 		wg.Done()
 
 		count := 0
@@ -68,8 +68,8 @@ func TestBroadcastMultiListener(t *testing.T) {
 	}()
 	<-started
 
-	b.Send("Message D [last for X]")
-	b.Send("Message LAST")
+	pcheck(b.Send("Message D [last for X]"))
+	pcheck(b.Send("Message LAST"))
 
 	b.Kill()
 	wg.Wait()

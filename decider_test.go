@@ -12,8 +12,7 @@ import (
 func TestTimeDecider(t *testing.T) {
 	assert := assert.New(t)
 
-	var d Decider
-	d = TimeDecider{}
+	var d Decider = TimeDecider{}
 
 	var b bool
 	var e error
