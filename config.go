@@ -12,6 +12,7 @@ import (
 // TODO: add readme docs for abstract/base stuff
 // TODO: add readme docs for vars section
 // TODO: add tests for abstract and vars functionality
+// TODO: after above 3 items we have a new release
 
 // ConfigFile represents all the data read from a config file
 type ConfigFile map[string]*BuildStep
