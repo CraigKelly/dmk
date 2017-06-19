@@ -9,41 +9,26 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-/* TODO: Base steps:
-
-UPDATED: We have abstract steps, now we need to create a POC in res/vars.yaml
-and actually handle variables
-
-   1. A step marks itself as something like abstract or template
-   2. "Actual" steps can list an abstract step as a base/template and will
-      receive its properties as a default
-   3. Every step gets a variable section where the vars get expanded. Eval
-      order will be step vars, then env vars, then globbing. Abstract steps
-      don't expand anything.
-   4. This means two new doc sections: variables and abstract steps.
-   5. Need really good testing for this stuff.
-   6. Examples for variables: the clean section for rubber/latex steps
-   7. Abstract steps would be handy for steps that are very similar (like
-      one step per csv file extracted from a data source)
-
-TODO: add some tests for abstract and vars yaml files
-*/
+// TODO: add readme docs for abstract/base stuff
+// TODO: add readme docs for vars section
+// TODO: add tests for abstract and vars functionality
 
 // ConfigFile represents all the data read from a config file
 type ConfigFile map[string]*BuildStep
 
 // BuildStep is a single step in a ConfigFile
 type BuildStep struct {
-	Name      string   // Set after parsing (not in config file)
-	Command   string   `yaml:"command"`
-	Inputs    []string `yaml:"inputs"`
-	Outputs   []string `yaml:"outputs"`
-	Clean     []string `yaml:"clean"`
-	Explicit  bool     `yaml:"explicit"`
-	DelOnFail bool     `yaml:"delOnFail"`
-	Direct    bool     `yaml:"direct"`
-	Abstract  bool     `yaml:"abstract"`
-	BaseStep  string   `yaml:"baseStep"`
+	Name      string            // Set after parsing (not in config file)
+	Command   string            `yaml:"command"`
+	Inputs    []string          `yaml:"inputs"`
+	Outputs   []string          `yaml:"outputs"`
+	Clean     []string          `yaml:"clean"`
+	Explicit  bool              `yaml:"explicit"`
+	DelOnFail bool              `yaml:"delOnFail"`
+	Direct    bool              `yaml:"direct"`
+	Abstract  bool              `yaml:"abstract"`
+	BaseStep  string            `yaml:"baseStep"`
+	Vars      map[string]string `yaml:"vars"`
 }
 
 // ReadConfig parses and returns the contents of the config file (or an error)
@@ -75,6 +60,11 @@ func ReadConfig(fileContent []byte) (ConfigFile, error) {
 				return nil, errors.New("No abstract step named " + step.BaseStep)
 			}
 
+			// ONLY copy command if we don't already have one
+			if len(step.Command) < 1 {
+				step.Command = abs.Command
+			}
+
 			// Copy properties that override
 			step.Explicit = abs.Explicit
 			step.DelOnFail = abs.DelOnFail
@@ -84,6 +74,13 @@ func ReadConfig(fileContent []byte) (ConfigFile, error) {
 			step.Inputs = append(step.Inputs, abs.Inputs...)
 			step.Outputs = append(step.Outputs, abs.Outputs...)
 			step.Clean = append(step.Clean, abs.Clean...)
+
+			// The Vars maps are different: the base map only supplies missing values
+			for k, v := range abs.Vars {
+				if _, ok := step.Vars[k]; !ok {
+					step.Vars[k] = v
+				}
+			}
 		}
 
 		// We allow globbing for inputs and clean
@@ -98,15 +95,23 @@ func ReadConfig(fileContent []byte) (ConfigFile, error) {
 			return nil, e
 		}
 
-		// Expand any environment variables in input/clean/output
+		// Expand any environment variables in command and input/clean/output
+		mapping := func(envKey string) string {
+			if val, ok := step.Vars[envKey]; ok {
+				return val
+			}
+			return os.Getenv(envKey)
+		}
+
+		step.Command = os.Expand(step.Command, mapping)
 		for i, t := range step.Inputs {
-			step.Inputs[i] = os.ExpandEnv(t)
+			step.Inputs[i] = os.Expand(t, mapping)
 		}
 		for i, t := range step.Outputs {
-			step.Outputs[i] = os.ExpandEnv(t)
+			step.Outputs[i] = os.Expand(t, mapping)
 		}
 		for i, t := range step.Clean {
-			step.Clean[i] = os.ExpandEnv(t)
+			step.Clean[i] = os.Expand(t, mapping)
 		}
 	}
 

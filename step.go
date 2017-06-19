@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"sort"
 	"strings"
 )
 
@@ -64,6 +65,16 @@ func NewBuildStepInst(step *BuildStep, allOutputs map[string]bool, verb *log.Log
 	}
 
 	verb.Printf("%s: Found %d deps\n", step.Name, len(deps))
+
+	// If verbose, output vars in sorted order
+	varKeys := []string{}
+	for k, _ := range step.Vars {
+		varKeys = append(varKeys, k)
+	}
+	sort.Strings(varKeys)
+	for _, k := range varKeys {
+		verb.Printf("%s: var[%s]=='%s'\n", step.Name, k, step.Vars[k])
+	}
 
 	return &BuildStepInstance{
 		Step:    step,

@@ -1,5 +1,4 @@
 # Proof of concept for abstract steps with variables
-# TODO: actually create variable POC
 
 base:
     abstract: true
@@ -8,16 +7,24 @@ base:
     direct: true
     clean:
         - extra.txt
+    vars:
+        var1: "base val 1"
+        var2: "base val 2"
 
 use_base:
     baseStep: base
-    command: "echo USING BASE | tee use-base.txt"
+    command: "echo USING BASE $var1 -- $var2 -- $var3 -- end | tee use-base.txt"
     outputs:
         - use-base.txt
     clean:
         - also-extra.txt
+    vars:
+        var2: "override val 2"
+        var3: "add var 3"
 
 no_base:
-    command: "echo NO BASE | tee no-base.txt"
+    command: "echo NO BASE $var1 -- $var2 -- $var3 -- end | tee no-base.txt"
     outputs:
         - no-base.txt
+    vars:
+        var3: "I should only have var 3"
