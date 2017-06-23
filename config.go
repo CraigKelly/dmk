@@ -11,6 +11,8 @@ import (
 
 // TODO: add readme docs for abstract/base stuff
 // TODO: add readme docs for vars section
+// TODO: make sure docs are clean about the DMK_* env vars are for
+//       COMMANDS RUNNING, not STEPS (although DMK_STEPNAME is avail)
 // TODO: add tests for abstract and vars functionality
 // TODO: after above 3 items we have a new release
 
@@ -51,6 +53,11 @@ func ReadConfig(fileContent []byte) (ConfigFile, error) {
 		// Manually set build step name
 		step.Name = name
 
+		// If they didn't supply a map then we need to create one
+		if step.Vars == nil {
+			step.Vars = make(map[string]string)
+		}
+
 		// Trim any whitespace from the command so they can use YAML multi-line
 		step.Command = strings.TrimSpace(step.Command)
 
@@ -83,6 +90,9 @@ func ReadConfig(fileContent []byte) (ConfigFile, error) {
 				}
 			}
 		}
+
+		// Special: we add DMK_STEPNAME to the variables
+		step.Vars["DMK_STEPNAME"] = step.Name
 
 		// We allow globbing for inputs and clean
 		if i, e := MultiGlob(step.Inputs); e == nil {
