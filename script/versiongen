@@ -6,16 +6,7 @@ import inspect
 import os
 import datetime
 
-pth = os.path
-
-
-FILE_PATH = inspect.getabsfile(lambda i: i)
-SCRIPT_DIR = pth.dirname(FILE_PATH)
-
-
-def rel_path(rel):
-    """Return a path relative to this script's dir."""
-    return pth.abspath(pth.join(SCRIPT_DIR, rel))
+from common import rel_path, cmd
 
 
 TEMPLATE = """
@@ -43,6 +34,8 @@ def main():
             ver,
             datetime.datetime.now().ctime()
         ))
+
+    cmd("go fmt version.go")
 
 
 if __name__ == "__main__":
