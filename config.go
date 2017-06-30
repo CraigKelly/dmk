@@ -11,6 +11,7 @@ import (
 
 // TODO: add readme docs for abstract/base stuff
 // TODO: add readme docs for vars section
+// TODO: add readme docs for -listSteps and bash completion
 // TODO: make sure docs are clean about the DMK_* env vars are for
 //       COMMANDS RUNNING, not STEPS (although DMK_STEPNAME is avail)
 // TODO: add tests for abstract and vars functionality
