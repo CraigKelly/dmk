@@ -14,6 +14,7 @@ $(BINARY): $(SOURCES) $(TESTED) $(VERSIONOUT)
 
 install: build
 	go install
+	sudo cp bash_completion/dmk_comp /etc/bash_completion.d/dmk_comp
 
 version: $(VERSIONOUT)
 $(VERSIONOUT): $(VERSIONIN)
