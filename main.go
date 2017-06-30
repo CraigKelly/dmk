@@ -1,5 +1,7 @@
 package main
 
+// TODO: -listSteps should NOT include abstract steps but it SHOULD include explicit steps
+
 import (
 	"flag"
 	"io/ioutil"
