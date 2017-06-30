@@ -5,7 +5,7 @@
 import json
 import os
 
-from common import cmd, rel_path 
+from common import cmd, rel_path
 
 
 def all_deps():

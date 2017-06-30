@@ -1,0 +1,16 @@
+#!/bin/bash
+
+_dmk_args()
+{
+    local cur opts #prev
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    # prev="${COMP_WORDS[COMP_CWORD-1]}"
+    opts="-h -c -f -v"
+
+    if [[ ${cur} == -* ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+        return 0
+    fi
+}
+complete -F _dmk_args dmk
