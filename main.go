@@ -66,7 +66,9 @@ func main() {
 	// read the config file
 	cfgText, err := ioutil.ReadFile(pipelineFile)
 	if os.IsNotExist(err) {
-		log.Printf("%s does not exist - exiting\n", pipelineFile)
+		if !listSteps {
+			log.Printf("%s does not exist - exiting\n", pipelineFile)
+		}
 		return
 	}
 	pcheck(err)
@@ -122,8 +124,10 @@ func main() {
 
 // DoListSteps just outputs all step names
 func DoListSteps(cfg ConfigFile, verb *log.Logger) int {
+	// We must write to stdout, so we always create our own logger
+	stepLog := log.New(os.Stdout, "", 0)
 	for _, step := range cfg {
-		log.Printf("%s\n", step.Name)
+		stepLog.Printf("%s\n", step.Name)
 	}
 	return 0
 }
