@@ -2,17 +2,20 @@
 
 _dmk_args()
 {
-    local cur opts #prev
     COMPREPLY=()
-    cur="${COMP_WORDS[COMP_CWORD]}"
-    # prev="${COMP_WORDS[COMP_CWORD-1]}"
-    opts="-h -c -f -v -listSteps"
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    # local prev="${COMP_WORDS[COMP_CWORD-1]}"
 
     if [[ ${cur} == -* ]] ; then
+        local opts
+        opts="-h -c -f -v -listSteps"
         COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
         return 0
     else
-        COMPREPLY=( $(dmk -listSteps) )
+        local steps
+        steps=$(dmk -listSteps | tr '\r\n\t' ' ')
+        COMPREPLY=( $(compgen -W "${steps}" -- "${cur}") )
+        return 0
     fi
 }
 complete -F _dmk_args dmk
