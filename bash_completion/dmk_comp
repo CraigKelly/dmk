@@ -6,11 +6,13 @@ _dmk_args()
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     # prev="${COMP_WORDS[COMP_CWORD-1]}"
-    opts="-h -c -f -v"
+    opts="-h -c -f -v -listSteps"
 
     if [[ ${cur} == -* ]] ; then
         COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
         return 0
+    else
+        COMPREPLY=( $(dmk -listSteps) )
     fi
 }
 complete -F _dmk_args dmk
