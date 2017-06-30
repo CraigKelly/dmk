@@ -14,19 +14,24 @@ import (
 
 func main() {
 	log.SetFlags(0)
-	log.Printf("dmk %s\n", Version())
 	pcheck(os.Setenv("DMK_VERSION", Version()))
 
 	flags := flag.NewFlagSet("dmk", flag.ExitOnError)
 	pipelineFileSpec := flags.String("f", "", "Pipeline file name")
 	cleanSpec := flags.Bool("c", false, "Clean instead of build")
 	verboseSpec := flags.Bool("v", false, "verbose output")
+	listStepsSpec := flags.Bool("listSteps", false, "list all steps and exit. No other actions will be taken")
 
 	pcheck(flags.Parse(os.Args[1:]))
 
 	clean := *cleanSpec
 	verbose := *verboseSpec
 	args := flags.Args()
+	listSteps := *listStepsSpec
+
+	if !listSteps {
+		log.Printf("dmk %s\n", Version())
+	}
 
 	// If they didn't select a pipeline file, we try to find a default
 	var pipelineFile string
@@ -56,6 +61,7 @@ func main() {
 	verb.Printf("Verbose mode: ON\n")
 	verb.Printf("Clean: %v\n", clean)
 	verb.Printf("Pipeline File: %s\n", pipelineFile)
+	verb.Printf("List Steps: %v\n", listSteps)
 
 	// read the config file
 	cfgText, err := ioutil.ReadFile(pipelineFile)
@@ -103,13 +109,23 @@ func main() {
 
 	// Do what we're supposed to do
 	var exitCode int
-	if clean {
+	if listSteps {
+		exitCode = DoListSteps(cfg, verb)
+	} else if clean {
 		exitCode = DoClean(cfg, verb)
 	} else {
 		exitCode = DoBuild(cfg, verb)
 	}
 
 	os.Exit(exitCode)
+}
+
+// DoListSteps just outputs all step names
+func DoListSteps(cfg ConfigFile, verb *log.Logger) int {
+	for _, step := range cfg {
+		log.Printf("%s\n", step.Name)
+	}
+	return 0
 }
 
 // DoClean cleans all files specified by the config file
