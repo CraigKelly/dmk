@@ -1,7 +1,5 @@
 package main
 
-// TODO: -listSteps should NOT include abstract steps but it SHOULD include explicit steps
-
 import (
 	"flag"
 	"io/ioutil"
@@ -103,13 +101,14 @@ func main() {
 		pcheck(err)
 		cfg = newCfg
 		verb.Printf("%d build steps remaining", len(cfg))
-	} else {
+	} else if !listSteps {
 		verb.Printf("No steps specified: removing steps where explicit=true\n")
 		newCfg, err = NoExplicit(cfg)
 		pcheck(err)
 		cfg = newCfg
 		verb.Printf("%d build steps remaining", len(cfg))
 	}
+	// No else: listSteps will include explicit steps
 
 	// Do what we're supposed to do
 	var exitCode int
