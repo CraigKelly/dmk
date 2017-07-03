@@ -65,7 +65,9 @@ the following names in the current directory (in order):
 
 You may also supply a custom name with the `-f` command line flag. If the
 pipeline file is in a different directory, dmk will change to that directory
-before parsing the config file.
+before parsing the config file. Note that the bash tab completion logic will
+show you step names, but it isn't smart enough to know that you've specified
+`-f` on the command line.
 
 All build steps run in parallel, but each step waits until other steps build
 its dependencies. A single build step executes the following steps:
@@ -79,7 +81,8 @@ its dependencies. A single build step executes the following steps:
 7. The step is now "Completed"
 
 The outputs for a step must be unique to that step: you can't have two steps
-both list `foo.data` as an output.
+both list `foo.data` as an output. (Note that this applies to *expanded* output
+names, and abstract/baseSteps aren't checked.)
 
 `dmk` provides an automatic "clean" mode that deletes all outputs. To use it,
 specify `-c` on the command line. `dmk` will delete all the outputs for all
@@ -88,6 +91,9 @@ them in the _clean_ list for a build step (see the Pipeline file format
 below). Good candidates for the _clean_ section are intermediate files (such
 as logs) generated as part of a build process that are not dependencies and
 should not determine if a build step is up to date.
+
+You may also run `dmk` with `-listSteps` to see a list of all steps in the current
+pipeline file. Currently, this is used for bash completion.
 
 ## Pipeline file format
 
@@ -112,11 +118,20 @@ step should specify:
 * _delOnFail_ - Optional, defaults to false. If set to true and the step fails,
   then `dmk` will delete all the step's output files.
 * _direct_ - Optional, default to false. If set to true, both stdout and stderr
-  from the stepis written to the `dmk` process standard streams. If set to false
+  from the step is written to the `dmk` process standard streams. If set to false
   (the default), stdout and stderr are written in single blocks after the step
   completes (stdout is only written if `dmk` is running in *verbose* mode).
-  Note in *direct* mode (direct=True), step output may be intereaved with
+  Note in *direct* mode (direct=True), step output may be interleaved with
   "normal" output when steps are running in parallel!
+* _abstract_ - Optional, defaults to false. If specified, the step is an "base step"
+  and will never be executed (it's only to be used as a baseStep). See below.
+* _baseStep_ - Optional, defaults to empty. If specified, it must be the name of a
+  step with `abstract: true`. In that case the step's properties will be based
+  on the step given. See below.
+* _vars_ - Optional, defaults to empty dictionary. If specified, this must be a
+  hash/dictionary with strings as both keys and values. The keys are treated as
+  variables names with are replaced with their corresponding values. See below
+  for variable details.
 
 The `res` subdirectory contains sample Pipeline files (used for testing), but
 a quick example would look like:
@@ -188,23 +203,91 @@ Nothing else would run.
 If you were to run `dmk extrastep depstep` then all steps would run (because
 `step1` and `step2` are `depstep` dependencies).
 
-## Building
+## Using Variables
 
-`godep` manages dependencies in the vendor directory. You shouldn't need to
-worry about this if you are building with the `Makefile`. Also note the
-fact that we use `make` to build `dmk`. We are serious about using the correct
-build tool for the job.
+You may use variables of various types in most of the fields in a `dmk` step.
 
-You should also have Python 3 installed (for `script/update` and for the test
-script `res/slow`).
+Before variable expansion begins, both `inputs` and `clean` are expanded via
+globbing (e.g. `*.csv` expands to all files ending in `.csv` in the current
+directory.)
 
-`make dist` will build cross-platform binaries in `./dist`. Yes, we commit them
-to the repo. Deal with it, they're small.
+After globbing expansion, `dmk` will expand variables for all the strings in:
 
-`make release` handles tagging and pushing to GitHub.
+* command
+* inputs
+* outputs
+* clean
 
-## Build step environment
-11
+
+Variables are expanded in the following order:
+
+1. Any keys from the current step's `vars` section (if specified)
+2. Any from the `vars` section of the current step's `baseStep` *if* that
+   variable wasn't specified by the current step.
+3. Any environment variables
+
+*IMPORTANT*: `DMK_STEPNAME` is defined at this point, but the other `DMK_`
+variables described below in "Build Step Environment" are *not*. However,
+the command will be executed in bash and they can be evaluated/used by a
+script at run time.
+
+See "Abstract/Base Steps" below for an example.
+
+(See below for more explanation of base steps)
+
+## Abstract/Base Steps
+
+`dmk` provides a way to create small template steps to make things easier to
+manage. Often you'll have a few steps that have very similar structures. In 
+that case you can specify a step with `abstract: true`. These steps will never
+be executed, but provide a "template" for "concrete" steps.
+
+If a step specified another step with `baseStep` then:
+
+* If the step has command specified, it takes the command of its base step
+* The base step's values for `explicit`, `delonFail`, and `direct` are all
+  used, regardless of the child step's settings
+* The base step's `inputs`, `outputs`, and `clean` entries are all added to
+  the child step's lists.
+* The base step's `vars` section provides the "defaults" for the child step
+  (The child's `vars` section always wins)
+
+Some rules:
+
+* A step named in `baseStep` must have `abstract: true`
+* An abstract step may *not* specify a `baseStep`
+
+
+Example (note that `inputs` and `outputs` are missing):
+
+```
+base:
+    command: "echo $A $B $C"
+    abstract: true
+    vars:
+        - A: Hello
+        - B: World
+stepa:
+    baseStep: base
+    vars:
+        - B: There
+        - C: Everyone
+stepb:
+    command: "echo $A $B $C"
+    vars:
+        - B: Anything
+        - C: Missing
+```
+
+When `stepa` is executed, it will echo `Hello There Everyone` because it inherits
+`A` from it's `baseStep`. Note that it does *not* use `B` from its `baseStep`.
+
+When `stepb` is executed it will echo the string `Anything Missing` because the
+command `echo $A Anything Missing` will be executed by bash, which will expand
+`$A` to an empty string.
+
+## Build Step Environment
+
 When a build step runs, `dmk` sets environment variables in the step command's
 process:
 
@@ -215,8 +298,9 @@ process:
 * DMK_OUTPUTS - a colon (":") delimited list of outputs for this step
 * DMK_CLEAN - a colon (":") delimited list of extra clean files for this step
 
-Also note that because `bash` evaluates the command, you can use the
-environment variables in the command itself. E.g. `mycmd --inputs $DMK_INPUTS`
+Also note that although `bash` evaluates the command, `dmk` does it's own variable
+expansion before executing the command. However, only `DMK_STEPNAME` will be defined
+for `dmk` variable expansion. See "Using Variables" above for details.
 
 ## Some helpful hints to remember
 
@@ -232,3 +316,23 @@ Commands run in a new bash shell (which also means you need bash).
 names relative to the Pipeline file's directory.
 
 You may use globbing patterns for the inputs and clean.
+
+## Building
+
+`godep` manages dependencies in the vendor directory. You shouldn't need to
+worry about this if you are building with the `Makefile`. Also note the
+fact that we use `make` to build `dmk`. We are serious about using the correct
+build tool for the job.
+
+You should also have Python 3 installed (for `script/update` and for the test
+script `res/slow`).
+
+`make dist` will build cross-platform binaries in `./dist`. Yes, we commit them
+to the repo. Deal with it, they're small.
+
+`make release` handles tagging and pushing to GitHub.
+
+`make install` will perform the standard `go install` but will *also* install the
+bash completions we make available for `dmk`. Note that this will use `sudo` and
+it currently the only way to get the bash completions.
+

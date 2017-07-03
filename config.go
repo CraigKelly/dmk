@@ -9,13 +9,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// TODO: add readme docs for abstract/base stuff
-// TODO: add readme docs for vars section
-// TODO: add readme docs for -listSteps and bash completion
-// TODO: make sure docs are clean about the DMK_* env vars are for
-//       COMMANDS RUNNING, not STEPS (although DMK_STEPNAME is avail)
 // TODO: add tests for abstract and vars functionality
-// TODO: after above 3 items we have a new release
+// TODO: after above items we have a new release
 
 // ConfigFile represents all the data read from a config file
 type ConfigFile map[string]*BuildStep
