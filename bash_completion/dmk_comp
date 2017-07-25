@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO: if prev flag was -f they are looking for a file
+
 _dmk_args()
 {
     COMPREPLY=()

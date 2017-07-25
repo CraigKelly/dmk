@@ -12,6 +12,8 @@ import (
 /////////////////////////////////////////////////////////////////////////////
 // Entry point
 
+// TODO: update bash completion to show files/paths if preceeding flag is -f
+
 func main() {
 	log.SetFlags(0)
 	pcheck(os.Setenv("DMK_VERSION", Version()))
