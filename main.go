@@ -206,18 +206,29 @@ func DoBuild(cfg ConfigFile, verb *log.Logger) int {
 	// Determine and use exit code
 	failCount := 0
 	successCount := 0
+	failDetail := make([]string, 0)
 	for _, step := range running {
 		if step.State == buildCompleted {
 			successCount++
 		} else if step.State == buildFailed {
 			failCount++
 			DeleteFailed(step.Step) // Remove any outputs on fail
+			failDetail = append(failDetail, step.Step.Name)
 		}
 	}
+
 	if failCount+successCount < len(running) {
 		log.Printf("Fatal error: at least one step has NOT completed\n")
 		failCount = failCount + successCount + 1
 	}
+
+	if failCount > 0 {
+		log.Printf("\n*** FAILURE!!!\n*** Count is %v\n", failCount)
+		for _, failName := range failDetail {
+			log.Printf("     - %s\n", failName)
+		}
+	}
+
 	return failCount
 }
 
