@@ -211,11 +211,11 @@ func (i *BuildStepInstance) Run() error {
 
 	// If we still need a build, then we failed
 	stillNeedBuild, err := i.decider.NeedBuild(i.Step.Inputs, i.Step.Outputs)
+	if err != nil {
+        return i.fail(fmt.Errorf("Build decider check failed AFTER build: %s", err.Error()))
+	}
 	if stillNeedBuild {
 		return i.fail(errors.New("Build still required after command finished"))
-	}
-	if err != nil {
-		return i.fail(err)
 	}
 
 	// if any outputs missing return failed
