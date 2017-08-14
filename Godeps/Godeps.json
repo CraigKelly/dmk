@@ -15,22 +15,22 @@
 		},
 		{
 			"ImportPath": "github.com/stretchr/testify/assert",
-			"Comment": "v1.1.4-70-g05e8a0e",
-			"Rev": "05e8a0eda380579888eb53c394909df027f06991"
+			"Comment": "v1.1.4-71-g890a5c3",
+			"Rev": "890a5c3458b43e6104ff5da8dfa139d013d77544"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v2",
-			"Rev": "25c4ec802a7d637f88d584ab26798e94ad14c13b"
+			"Rev": "eb3733d160e74a9c7e442f435eb3bea458e1d19f"
 		},
 		{
 			"ImportPath": "github.com/stretchr/testify/vendor/github.com/davecgh/go-spew/spew",
-			"Comment": "v1.1.4-70-g05e8a0e",
-			"Rev": "05e8a0eda380579888eb53c394909df027f06991"
+			"Comment": "v1.1.4-71-g890a5c3",
+			"Rev": "890a5c3458b43e6104ff5da8dfa139d013d77544"
 		},
 		{
 			"ImportPath": "github.com/stretchr/testify/vendor/github.com/pmezard/go-difflib/difflib",
-			"Comment": "v1.1.4-70-g05e8a0e",
-			"Rev": "05e8a0eda380579888eb53c394909df027f06991"
+			"Comment": "v1.1.4-71-g890a5c3",
+			"Rev": "890a5c3458b43e6104ff5da8dfa139d013d77544"
 		}
 	]
 }
