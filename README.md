@@ -178,8 +178,8 @@ extrastep:
 
 If you were to run `dmk -c` then it would deleted the following files:
 
-* o1.txt, o2.txt, o3.txt, a.aux, and b.log because of `step1`
-*  because of the `clean` list in `step1`
+* o1.txt, o2.txt, o3.txt because they are outputs of `step1`
+* a.aux and b.log because they are in the `clean` list in `step1`
 * output.bin because of `step2`
 * combination.output and any files matching the pattern `need-cleaning.*` because of `depstep`
 
