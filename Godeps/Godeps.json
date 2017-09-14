@@ -5,8 +5,8 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/davecgh/go-spew/spew",
-			"Comment": "v1.1.0-6-gadab964",
-			"Rev": "adab96458c51a58dc1783b3335dcce5461522e75"
+			"Comment": "v1.1.0-7-ga476722",
+			"Rev": "a476722483882dd40b8111f0eb64e1d7f43f56e4"
 		},
 		{
 			"ImportPath": "github.com/pmezard/go-difflib/difflib",
