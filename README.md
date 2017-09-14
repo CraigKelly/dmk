@@ -70,14 +70,14 @@ show you step names, but it isn't smart enough to know that you've specified
 `-f` on the command line.
 
 All build steps run in parallel, but each step waits until other steps build
-its dependencies. A single build step executes the following steps:
+its dependencies. A single build step executes the following in order:
 
 1. The step is "Started"
 2. If any of the required inputs are another step's outputs, then wait for a built message.
 3. Check to see if *any* outputs are older than *any* of the inputs. If not, then the step is "Completed"!
 4. If not done, set status to "Executing" and run the command.
 5. If the command returns an error code or if *any* outputs are missing or older than *any* inputs, the step is "Failed".
-6. If not done, send notification messages for each output for any waiting steps.
+6. Send notification messages for each output for any waiting steps.
 7. The step is now "Completed"
 
 The outputs for a step must be unique to that step: you can't have two steps
@@ -136,7 +136,7 @@ step should specify:
 The `res` subdirectory contains sample Pipeline files (used for testing), but
 a quick example would look like:
 
-````
+````yaml
 # You can have comments in a file
 step1:                                # first step
     command: "xformxyz i{1,2,3}.txt"  # command with some shell magic
@@ -260,7 +260,7 @@ Some rules:
 
 Example (note that `inputs` and `outputs` are missing):
 
-```
+```yaml
 base:
     command: "echo $A $B $C"
     abstract: true
