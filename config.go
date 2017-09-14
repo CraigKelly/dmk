@@ -9,6 +9,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// TODO: consider moving from godep to dep
 // TODO: add tests for abstract and vars functionality
 // TODO: after above items we have a new release
 
