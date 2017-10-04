@@ -1,55 +1,25 @@
-#!/usr/bin/env python3
+#!/usr/bin/env bash
 
-"""Simple updater for our godep project."""
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
 
-import json
-import os
+echo ""
 
-from common import cmd, rel_path
+echo -e "${GREEN}Pre Update Status${NC}"
+dep status
 
+echo ""
 
-def all_deps():
-    """Generator that finds all deps in the Godeps file."""
-    with open(rel_path("../Godeps/Godeps.json")) as f:
-        data = f.read()
-    for d in json.loads(data).get('Deps', list()):
-        yield d
+echo -e "${GREEN}UPDATE${NC}"
+dep ensure -update -v
 
+echo ""
 
-def targets(deps):
-    """Generator that yields targets for updates."""
-    for dep in deps:
-        target = dep["ImportPath"]
-        if '/vendor/' in target:
-            print("Skipping: %s" % target)
-        else:
-            yield target
+echo -e "${RED}POST Update Status${NC}"
+dep status
 
+echo ""
 
-def main():
-    """Entry point."""
-    os.chdir(rel_path(".."))
-
-    pre_updates = [t for t in targets(all_deps())]
-    for target in pre_updates:
-        cmd("go get -u %s", target)
-
-    cmd("godep save")
-
-    updates = [t for t in targets(all_deps())]
-
-    # Only need to go get stuff we missed before
-    skips = set(pre_updates)
-    for target in updates:
-        if target not in skips:
-            cmd("go get -u %s", target)
-
-    for target in updates:
-        cmd("godep update %s", target)
-
-    print("")
-    print("You should check `git diff` and then commit")
-
-
-if __name__ == "__main__":
-    main()
+echo -e "${YELLOW}You should check git status now${NC}"

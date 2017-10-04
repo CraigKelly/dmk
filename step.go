@@ -149,11 +149,11 @@ func (i *BuildStepInstance) Run() error {
 			}
 		}
 
-        // IF we still have deps, then something has gone really wrong
-        if len(waitingDeps) > 0 {
-            i.verb.Printf("%s: %d deps will never finish, exiting\n", i.Step.Name, len(waitingDeps))
-            return i.fail(fmt.Errorf("Broadcaster done, still have %d deps", len(waitingDeps)))
-        }
+		// IF we still have deps, then something has gone really wrong
+		if len(waitingDeps) > 0 {
+			i.verb.Printf("%s: %d deps will never finish, exiting\n", i.Step.Name, len(waitingDeps))
+			return i.fail(fmt.Errorf("Broadcaster done, still have %d deps", len(waitingDeps)))
+		}
 	}
 
 	// If we have inputs, check to see if we need to build
@@ -218,7 +218,7 @@ func (i *BuildStepInstance) Run() error {
 	// If we still need a build, then we failed
 	stillNeedBuild, err := i.decider.NeedBuild(i.Step.Inputs, i.Step.Outputs)
 	if err != nil {
-        return i.fail(fmt.Errorf("Build decider check failed AFTER build: %s", err.Error()))
+		return i.fail(fmt.Errorf("Build decider check failed AFTER build: %s", err.Error()))
 	}
 	if stillNeedBuild {
 		return i.fail(errors.New("Build still required after command finished"))

@@ -28,6 +28,9 @@ clean:
 format:
 	go fmt *.go
 
+lint: format
+	go vet
+
 test: $(TESTED) $(TESTRESOURCES)
 $(TESTED): $(SOURCES) $(VERSIONOUT)
 	$(TOOLDIR)/test
@@ -47,4 +50,4 @@ dist: build
 release: build dist
 	$(TOOLDIR)/release
 
-.PHONY: clean test testv cover build run update version release
+.PHONY: clean test testv cover build run update version release install format dist lint

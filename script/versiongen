@@ -2,7 +2,6 @@
 
 """Simple version go generation for our project."""
 
-import inspect
 import os
 import datetime
 
@@ -22,21 +21,21 @@ func Version() string {
 
 def main():
     """Entry point."""
-    os.chdir(rel_path(".."))
+    os.chdir(rel_path('..'))
 
-    with open("VERSION", "r") as f:
+    with open('VERSION', 'r') as f:
         ver = f.read().strip()
     if not ver:
-        ver = "UNKNOWN VERSION"
+        ver = 'UNKNOWN VERSION'
 
-    with open("version.go", "w") as f:
+    with open('version.go', 'w') as f:
         f.write(TEMPLATE % (
             ver,
             datetime.datetime.now().ctime()
         ))
 
-    cmd("go fmt version.go")
+    cmd('go fmt version.go')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

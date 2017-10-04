@@ -118,7 +118,7 @@ step should specify:
 * _delOnFail_ - Optional, defaults to false. If set to true and the step fails,
   then `dmk` will delete all the step's output files.
 * _direct_ - Optional, default to false. If set to true, both stdout and stderr
-  from the step is written to the `dmk` process standard streams. If set to false
+  from the step are written to the `dmk` process standard streams. If set to false
   (the default), stdout and stderr are written in single blocks after the step
   completes (stdout is only written if `dmk` is running in *verbose* mode).
   Note in *direct* mode (direct=True), step output may be interleaved with
@@ -205,7 +205,7 @@ If you were to run `dmk extrastep depstep` then all steps would run (because
 
 ## Using Variables
 
-You may use variables of various types in most of the fields in a `dmk` step.
+`dmk` steps support variable expansion.
 
 Before variable expansion begins, both `inputs` and `clean` are expanded via
 globbing (e.g. `*.csv` expands to all files ending in `.csv` in the current
@@ -217,7 +217,6 @@ After globbing expansion, `dmk` will expand variables for all the strings in:
 * inputs
 * outputs
 * clean
-
 
 Variables are expanded in the following order:
 
@@ -238,7 +237,7 @@ See "Abstract/Base Steps" below for an example.
 ## Abstract/Base Steps
 
 `dmk` provides a way to create small template steps to make things easier to
-manage. Often you'll have a few steps that have very similar structures. In 
+manage. Often you'll have a few steps that have similar structures. In 
 that case you can specify a step with `abstract: true`. These steps will never
 be executed, but provide a "template" for "concrete" steps.
 
