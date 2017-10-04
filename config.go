@@ -11,6 +11,7 @@ import (
 
 // TODO: consider moving from godep to dep
 // TODO: add tests for abstract and vars functionality
+// TODO: add examples directory with some docs
 // TODO: after above items we have a new release
 
 // ConfigFile represents all the data read from a config file
