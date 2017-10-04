@@ -148,6 +148,12 @@ func (i *BuildStepInstance) Run() error {
 				break
 			}
 		}
+
+        // IF we still have deps, then something has gone really wrong
+        if len(waitingDeps) > 0 {
+            i.verb.Printf("%s: %d deps will never finish, exiting\n", i.Step.Name, len(waitingDeps))
+            return i.fail(fmt.Errorf("Broadcaster done, still have %d deps", len(waitingDeps)))
+        }
 	}
 
 	// If we have inputs, check to see if we need to build
