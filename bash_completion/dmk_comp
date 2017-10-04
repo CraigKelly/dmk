@@ -9,7 +9,7 @@ _dmk_args()
 
     if [[ ${cur} == -* ]] ; then
         local opts
-        opts="-h -c -f -v -listSteps"
+        opts="-h -c -f -v -e -listSteps"
         COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
         return 0
     else

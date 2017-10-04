@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/joho/godotenv"
 )
 
 /////////////////////////////////////////////////////////////////////////////
@@ -20,6 +22,7 @@ func main() {
 	pipelineFileSpec := flags.String("f", "", "Pipeline file name")
 	cleanSpec := flags.Bool("c", false, "Clean instead of build")
 	verboseSpec := flags.Bool("v", false, "verbose output")
+	envSpec := flags.String("e", "", "Environment file")
 	listStepsSpec := flags.Bool("listSteps", false, "list all steps and exit. No other actions will be taken")
 
 	pcheck(flags.Parse(os.Args[1:]))
@@ -62,6 +65,12 @@ func main() {
 	verb.Printf("Clean: %v\n", clean)
 	verb.Printf("Pipeline File: %s\n", pipelineFile)
 	verb.Printf("List Steps: %v\n", listSteps)
+
+	// Import environment variables from envFile if specified
+	if envSpec != nil && *envSpec != "" {
+		verb.Printf("Env File: %s\n", *envSpec)
+		pcheck(godotenv.Load(*envSpec))
+	}
 
 	// read the config file
 	cfgText, err := ioutil.ReadFile(pipelineFile)

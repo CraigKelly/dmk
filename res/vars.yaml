@@ -28,3 +28,13 @@ no_base:
         - no-base.txt
     vars:
         var3: "I should only have var 3"
+
+from_env:
+    command: "echo env var TESTME ${TESTME} | tee from-env.txt"
+    explicit: true
+    delOnFail: true
+    direct: true
+    inputs:
+        - from_env.vars.env
+    outputs:
+        - from-env.txt

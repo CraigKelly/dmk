@@ -223,7 +223,8 @@ Variables are expanded in the following order:
 1. Any keys from the current step's `vars` section (if specified)
 2. Any from the `vars` section of the current step's `baseStep` *if* that
    variable wasn't specified by the current step.
-3. Any environment variables
+3. Any environment variables - note that you can set environment variables
+   from an env file: see "Build Step Environment" below.
 
 *IMPORTANT*: `DMK_STEPNAME` is defined at this point, but the other `DMK_`
 variables described below in "Build Step Environment" are *not*. However,
@@ -287,6 +288,11 @@ command `echo $A Anything Missing` will be executed by bash, which will expand
 
 ## Build Step Environment
 
+Before the pipeline file is read, `dmk` will load the env file specified by the
+(optional) `-e` command line parameter. This functionality comes from the excellent
+[GoDotEnv](https://github.com/joho/godotenv) library, which is based on the Ruby dotenv
+project.
+
 When a build step runs, `dmk` sets environment variables in the step command's
 process:
 
@@ -296,6 +302,10 @@ process:
 * DMK_INPUTS - a colon (":") delimited list of inputs for this step
 * DMK_OUTPUTS - a colon (":") delimited list of outputs for this step
 * DMK_CLEAN - a colon (":") delimited list of extra clean files for this step
+
+**IMPORTANT!** These DMK_ variables are setup *after* the config file is read
+and *will* override any variables set in the environment before startup or via
+an env file.
 
 Also note that although `bash` evaluates the command, `dmk` does it's own variable
 expansion before executing the command. However, only `DMK_STEPNAME` will be defined
@@ -318,12 +328,20 @@ You may use globbing patterns for the inputs and clean.
 
 ## Building
 
-`godep` manages dependencies in the vendor directory. You shouldn't need to
-worry about this if you are building with the `Makefile`. Also note the
-fact that we use `make` to build `dmk`. We are serious about using the correct
-build tool for the job.
+`dep` manages dependencies in the vendor directory. Although the project began
+with `godep` (which is/was an excellent tool), we're switching to `dep` in
+anticipation of it becoming the de facto dependency managment tool for Gophers.
+In addition, switching to `dep` before it's the standard seem like a good way
+to give back to the Go community.
 
-You should also have Python 3 installed (for `script/update` and for the test
+You shouldn't need to worry about dependencies if you are building with the
+`Makefile`. Also note the fact that we use `make` to build `dmk`. We are serious
+about using the correct build tool for the job.
+
+Yes, we currently regenerate `version.go` too frequently. If we ever get a single
+contributor or pull request, we'll make it better :)
+
+You should also have Python 3 installed (for `script/versiongen` and for the test
 script `res/slow`).
 
 `make dist` will build cross-platform binaries in `./dist`. Yes, we commit them
