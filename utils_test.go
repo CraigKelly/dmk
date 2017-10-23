@@ -1,7 +1,10 @@
 package main
 
 import (
+	"io/ioutil"
+	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -36,6 +39,52 @@ func TestFindFirstFile(t *testing.T) {
 	assert.Equal("", FirstFileFound(""))
 	assert.Equal("", FirstFileFound("."))
 	assert.Equal("", FirstFileFound(".."))
+}
+
+func TestTimeChecks(t *testing.T) {
+	assert := assert.New(t)
+
+	var ti time.Time
+	var e error
+
+	// Some super simple testing
+	ti, e = MinTime([]string{})
+	assert.Equal(time.Time{}, ti)
+	assert.NoError(e)
+
+	ti, e = MaxTime([]string{})
+	assert.Equal(time.Time{}, ti)
+	assert.NoError(e)
+
+	// Need a test file and it's time stamp
+	tmp, e := ioutil.TempFile("", "dmktest")
+	assert.Nil(e)
+	assert.NotNil(tmp)
+	defer os.Remove(tmp.Name())
+	if _, we := tmp.Write([]byte("yadda")); we != nil {
+		assert.Fail(we.Error())
+	}
+	tmp.Close()
+	st, e := os.Stat(tmp.Name())
+	expect := st.ModTime()
+
+	// Single file testing
+	ti, e = MinTime([]string{tmp.Name()})
+	assert.Equal(expect, ti)
+	assert.NoError(e)
+
+	ti, e = MaxTime([]string{tmp.Name()})
+	assert.Equal(expect, ti)
+	assert.NoError(e)
+
+	// Multi file testing
+	ti, e = MinTime([]string{tmp.Name(), tmp.Name(), tmp.Name()})
+	assert.Equal(expect, ti)
+	assert.NoError(e)
+
+	ti, e = MaxTime([]string{tmp.Name(), tmp.Name(), tmp.Name()})
+	assert.Equal(expect, ti)
+	assert.NoError(e)
 }
 
 func TestMultiGlob(t *testing.T) {
