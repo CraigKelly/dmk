@@ -349,7 +349,13 @@ to the repo. Deal with it, they're small.
 
 `make release` handles tagging and pushing to GitHub.
 
-`make install` will perform the standard `go install` but will *also* install the
-bash completions we make available for `dmk`. Note that this will use `sudo` and
-it currently the only way to get the bash completions.
+`make install` will perform the standard `go install` but will *also* install
+the bash completions we make available for `dmk`. Note that this will use
+`sudo` and it currently the only way to get the bash completions.
+
+Before submiting a pull-request or merging into a mainline branch, you should
+be sure that `make lint` passes with no errors. We use the standard `go vet`
+plus a few extras. Even though we don't use the entire `gometalinter` suite, we
+do use it to install the linters we use. All this can be handled with
+`make lint-install`.
 

@@ -25,11 +25,17 @@ clean:
 	rm -f $(BINARY) debug debug.test cover.out $(TESTED) $(VERSIONOUT)
 	$(TOOLDIR)/versiongen
 
+lint-install:
+	go get -u github.com/alecthomas/gometalinter
+	gometalinter --install
+
 format:
 	go fmt *.go
 
 lint: format
 	go vet
+	golint
+	goconst .
 
 test: $(TESTED) $(TESTRESOURCES)
 $(TESTED): $(SOURCES) $(VERSIONOUT)
