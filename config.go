@@ -9,7 +9,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// TODO: add tests for abstract and vars functionality
+// TODO: add tests for vars functionality
 // TODO: add examples directory with some docs
 // TODO: after above items we have a new release
 

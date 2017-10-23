@@ -139,3 +139,62 @@ func TestExplicitOnly(t *testing.T) {
 	assert.NoError(err)
 	assert.Len(newCfg, 0)
 }
+
+func TestAbstractSteps(t *testing.T) {
+	assert := assert.New(t)
+
+	var err error
+
+	cfgText, err := ioutil.ReadFile("res/abstract.yaml")
+	pcheck(err)
+	cfg, err := ReadConfig(cfgText)
+	pcheck(err)
+	assert.Len(cfg, 3) // 3 = 4 - 1 abstract
+
+	allSteps := []string{
+		"no_base", "use_base_max", "use_base_min",
+	}
+
+	assertSteps(assert, cfg, allSteps, allSteps...)
+
+	var step *BuildStep
+
+	// No leakage into no_base step
+	step = cfg["no_base"]
+	assert.NotNil(step)
+	assert.Equal(step.Command, "no-base-command")
+	assert.Equal(step.Explicit, false)
+	assert.Equal(step.DelOnFail, false)
+	assert.Equal(step.Direct, false)
+	assert.Equal(step.Abstract, false)
+	assert.Equal(len(step.BaseStep), 0)
+	assert.Equal(len(step.Inputs), 0)
+	assert.Equal(step.Outputs, []string{"no-base.txt"})
+	assert.Equal(len(step.Clean), 0)
+
+	// Minimal implementation in a base step
+	step = cfg["use_base_min"]
+	assert.NotNil(step)
+	assert.Equal(step.Command, "base-command")
+	assert.Equal(step.Explicit, true)
+	assert.Equal(step.DelOnFail, true)
+	assert.Equal(step.Direct, true)
+	assert.Equal(step.Abstract, false)
+	assert.Equal(step.BaseStep, "base")
+	assert.Equal(step.Inputs, []string{"base-input.txt"})
+	assert.Equal(step.Outputs, []string{"base-output.txt"})
+	assert.Equal(step.Clean, []string{"extra.txt"})
+
+	// Minimal implementation in a base step
+	step = cfg["use_base_max"]
+	assert.NotNil(step)
+	assert.Equal(step.Command, "override-command")
+	assert.Equal(step.Explicit, true)
+	assert.Equal(step.DelOnFail, true)
+	assert.Equal(step.Direct, true)
+	assert.Equal(step.Abstract, false)
+	assert.Equal(step.BaseStep, "base")
+	assert.Equal(step.Inputs, []string{"base-extra-input.txt", "base-input.txt"})
+	assert.Equal(step.Outputs, []string{"base-extra-output.txt", "base-output.txt"})
+	assert.Equal(step.Clean, []string{"base-extra-clean.txt", "extra.txt"})
+}

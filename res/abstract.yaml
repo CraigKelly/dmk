@@ -2,21 +2,31 @@
 
 base:
     abstract: true
-    explicit: false
+    explicit: true
     delOnFail: true
     direct: true
+    command: "base-command"
+    inputs:
+        - base-input.txt
+    outputs:
+        - base-output.txt
     clean:
         - extra.txt
 
-use_base:
+use_base_min:
     baseStep: base
-    command: "echo USING BASE | tee use-base.txt"
+
+use_base_max:
+    baseStep: base
+    command: "override-command"
+    inputs:
+        - base-extra-input.txt
     outputs:
-        - use-base.txt
+        - base-extra-output.txt
     clean:
-        - also-extra.txt
+        - base-extra-clean.txt
 
 no_base:
-    command: "echo NO BASE | tee no-base.txt"
+    command: "no-base-command"
     outputs:
         - no-base.txt
