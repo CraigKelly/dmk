@@ -75,4 +75,9 @@ func TestMultiGlob(t *testing.T) {
 	found, err = MultiGlob([]string{"utils.go", "util*.go"})
 	assert.Equal([]string{"utils.go", "utils_test.go"}, found)
 	assert.NoError(err)
+
+	// Final test - make sure we correctly handle bad patterns
+	found, err = MultiGlob([]string{"a", "util*.go", "[]a]"})
+	assert.Equal([]string{}, found)
+	assert.Error(err)
 }
