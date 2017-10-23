@@ -64,4 +64,10 @@ func TestTimeDecider(t *testing.T) {
 	b, e = d.NeedBuild([]string{i1.Name()}, []string{o1.Name()})
 	assert.False(b)
 	assert.Nil(e)
+
+	// Input missing - build required, and MUST return an error
+	os.Remove(i1.Name())
+	b, e = d.NeedBuild([]string{i1.Name()}, []string{o1.Name()})
+	assert.True(b)
+	assert.NotNil(e)
 }
