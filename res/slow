@@ -22,6 +22,9 @@ def main():
             'EOF\n'
         ])
 
+    print('STDOUT: Wrote {} to {}'.format(contents, filename), file=sys.stdout)
+    print('STDERR: Wrote {} to {}'.format(contents, filename), file=sys.stderr)
+
 
 if __name__ == '__main__':
     main()
