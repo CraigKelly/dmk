@@ -56,6 +56,15 @@ func TestTimeChecks(t *testing.T) {
 	assert.Equal(time.Time{}, ti)
 	assert.NoError(e)
 
+	// Fail on missing file
+	ti, e = MinTime([]string{"/nothing/to/read"})
+	assert.Equal(time.Time{}, ti)
+	assert.Error(e)
+
+	ti, e = MaxTime([]string{"/nothing/to/read"})
+	assert.Equal(time.Time{}, ti)
+	assert.Error(e)
+
 	// Need a test file and it's time stamp
 	tmp, e := ioutil.TempFile("", "dmktest")
 	assert.Nil(e)
@@ -85,6 +94,23 @@ func TestTimeChecks(t *testing.T) {
 	ti, e = MaxTime([]string{tmp.Name(), tmp.Name(), tmp.Name()})
 	assert.Equal(expect, ti)
 	assert.NoError(e)
+
+	ti, e = MinTime([]string{tmp.Name(), tmp.Name(), "/dev/null"})
+	// assert.Equal(expect, ti)
+	assert.NoError(e)
+
+	ti, e = MaxTime([]string{"/dev/null", tmp.Name(), tmp.Name()})
+	assert.Equal(expect, ti)
+	assert.NoError(e)
+
+	// Multi file with error
+	ti, e = MinTime([]string{tmp.Name(), tmp.Name(), "/nothing/to/read"})
+	assert.Equal(time.Time{}, ti)
+	assert.Error(e)
+
+	ti, e = MaxTime([]string{tmp.Name(), tmp.Name(), "/nothing/to/read"})
+	assert.Equal(time.Time{}, ti)
+	assert.Error(e)
 }
 
 func TestMultiGlob(t *testing.T) {

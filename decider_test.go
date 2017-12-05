@@ -29,6 +29,10 @@ func TestTimeDecider(t *testing.T) {
 	assert.True(b)
 	assert.Nil(e)
 
+	b, e = d.NeedBuild([]string{"/nothing/to/read"}, []string{"/nothing/to/read"})
+	assert.True(b)
+	assert.Error(e)
+
 	o1, e := ioutil.TempFile("", "dmktest")
 	assert.Nil(e)
 	assert.NotNil(o1)
