@@ -1,6 +1,6 @@
 package main
 
-import "errors"
+import "github.com/pkg/errors"
 
 // Decider is something that determines if a build step should run
 type Decider interface {
@@ -22,7 +22,7 @@ func (td TimeDecider) NeedBuild(inputs []string, outputs []string) (bool, error)
 		// If there was an error or we couldn't find the inputs, then we can't
 		// build anything (missing deps)
 		if err != nil {
-			return true, err
+            return true, errors.Wrap(err, "Error checking dependncy: cannot build")
 		}
 		return true, errors.New("Missing a dependency: cannot build")
 	}
