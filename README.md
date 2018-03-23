@@ -1,4 +1,6 @@
-# dmk
+---
+title: DMK ReadMe
+---
 
 This is a simplified, automated build tool for data projects.
 
@@ -6,7 +8,7 @@ The idea behind dmk is to support build files that are easy to read *and*
 write, and to support automating a build system for data artifacts. `make`,
 `scons`, and `fac` all provided inspiration for `dmk`.
 
-## Who should use this?
+# Who should use this?
 
 This is a tool for data flows and simple projects. Often these projects
 involve one-time steps for getting the data used for analysis. Often the user
@@ -22,7 +24,7 @@ you're an `scons` fan).
 *Protip*: if you're looking for a command to handle building reports from `.tex`
 files (including handling metapost and biblatex), look into `rubber`.
 
-## What is this NOT for?
+# What is this NOT for?
 
 This is *not* mean to replace a real automated build tool for a software
 project. As a general rule:
@@ -36,7 +38,7 @@ project. As a general rule:
 For instance, this project (written in Go) is actually built with `make` + the
 standard Go tools.
 
-## Using
+# Using
 
 When running `dmk`, you may specify `-h` on the command line for information
 on command line parameters. Specify `-v` for "verbose" mode to get output you
@@ -95,7 +97,7 @@ should not determine if a build step is up to date.
 You may also run `dmk` with `-listSteps` to see a list of all steps in the current
 pipeline file. Currently, this is used for bash completion.
 
-## Pipeline file format
+# Pipeline file format
 
 The file is in YAML format where each build step is a named hash. Each build
 step should specify:
@@ -203,7 +205,7 @@ Nothing else would run.
 If you were to run `dmk extrastep depstep` then all steps would run (because
 `step1` and `step2` are `depstep` dependencies).
 
-## Using Variables
+# Using Variables
 
 `dmk` steps support variable expansion.
 
@@ -235,7 +237,7 @@ See "Abstract/Base Steps" below for an example.
 
 (See below for more explanation of base steps)
 
-## Abstract/Base Steps
+# Abstract/Base Steps
 
 `dmk` provides a way to create small template steps to make things easier to
 manage. Often you'll have a few steps that have similar structures. In 
@@ -286,7 +288,7 @@ When `stepb` is executed it will echo the string `Anything Missing` because the
 command `echo $A Anything Missing` will be executed by bash, which will expand
 `$A` to an empty string.
 
-## Build Step Environment
+# Build Step Environment
 
 Before the pipeline file is read, `dmk` will load the env file specified by the
 (optional) `-e` command line parameter. This functionality comes from the excellent
@@ -322,7 +324,7 @@ environment that `dmk` is running in, modified in this order:
 6. For each step, add the step variables (as defined above)
 
 
-## Some helpful hints to remember
+# Some helpful hints to remember
 
 A pipeline file is a YAML document, and a **JSON** document is valid YAML. For
 instance, `res/slowbuild.yaml` and `res/slowbuild.json` are semantically
@@ -337,7 +339,7 @@ names relative to the Pipeline file's directory.
 
 You may use globbing patterns for the inputs and clean.
 
-## Building
+# Building
 
 `dep` manages dependencies in the vendor directory. Although the project began
 with `godep` (which is/was an excellent tool), we're switching to `dep` in
