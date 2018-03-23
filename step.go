@@ -174,16 +174,16 @@ func (i *BuildStepInstance) Run() error {
 	cmd := exec.Command("/bin/bash", "-c", i.Step.Command)
 
 	env := os.Environ()
-    // Some variables are already set in our environment
-    // DMK_VERSION is set on startup, DMK_PIPELINE is set after reading the file
+	// Some variables are already set in our environment
+	// DMK_VERSION is set on startup, DMK_PIPELINE is set after reading the file
 	env = append(env, fmt.Sprintf("DMK_STEPNAME=%s", i.Step.Name))
 	env = append(env, fmt.Sprintf("DMK_INPUTS=%v", strings.Join(i.Step.Inputs, ":")))
 	env = append(env, fmt.Sprintf("DMK_OUTPUTS=%v", strings.Join(i.Step.Outputs, ":")))
 	env = append(env, fmt.Sprintf("DMK_CLEAN=%v", strings.Join(i.Step.Clean, ":")))
-    // Now add the step variables to the environment
-    for k, v := range i.Step.Vars {
-        env = append(env, fmt.Sprintf("%v=%v", k, v))
-    }
+	// Now add the step variables to the environment
+	for k, v := range i.Step.Vars {
+		env = append(env, fmt.Sprintf("%v=%v", k, v))
+	}
 	cmd.Env = env
 
 	var stdOut stepOutput
