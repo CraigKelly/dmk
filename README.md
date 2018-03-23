@@ -311,6 +311,17 @@ Also note that although `bash` evaluates the command, `dmk` does it's own variab
 expansion before executing the command. However, only `DMK_STEPNAME` will be defined
 for `dmk` variable expansion. See "Using Variables" above for details.
 
+When the command for a step is activated, it will inherit the original
+environment that `dmk` is running in, modified in this order:
+
+1. Start with the original environment
+2. Set DMK_VERSION
+3. Optionally load an .env file, which will update the environment
+4. Set DMK_PIPELINE
+5. For each step, add the build step environment variables
+6. For each step, add the step variables (as defined above)
+
+
 ## Some helpful hints to remember
 
 A pipeline file is a YAML document, and a **JSON** document is valid YAML. For
