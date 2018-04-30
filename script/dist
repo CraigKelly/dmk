@@ -6,8 +6,6 @@ cd "$SCRIPT_DIR/.."
 rm -fr ./dist
 mkdir ./dist
 
-# TODO: we should consider using gox - https://github.com/mitchellh/gox
-
 function one_dist() {
     rm -f ./dmk ./dmk.exe
     export GOOS=$1
