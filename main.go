@@ -19,7 +19,7 @@ func main() {
 	pcheck(os.Setenv("DMK_VERSION", Version()))
 
 	flags := flag.NewFlagSet("dmk", flag.ExitOnError)
-	pipelineFileSpec := flags.String("f", "", "Pipeline file name")
+	pipelineFileSpec := flags.String("f", "", "Pipeline file name (can be - for stdin)")
 	cleanSpec := flags.Bool("c", false, "Clean instead of build")
 	verboseSpec := flags.Bool("v", false, "verbose output")
 	envSpec := flags.String("e", "", "Environment file")
@@ -73,7 +73,14 @@ func main() {
 	}
 
 	// read the config file
-	cfgText, err := ioutil.ReadFile(pipelineFile)
+	var cfgText []byte
+	var err error
+	if pipelineFile == "-" {
+		cfgText, err = ioutil.ReadAll(os.Stdin)
+	} else {
+		cfgText, err = ioutil.ReadFile(pipelineFile)
+	}
+
 	if os.IsNotExist(err) {
 		if !listSteps {
 			log.Printf("%s does not exist - exiting\n", pipelineFile)
@@ -83,19 +90,25 @@ func main() {
 	pcheck(err)
 	verb.Printf("Read %d bytes from %s\n", len(cfgText), pipelineFile)
 
-	// Before we change directory, go ahead save the absolute path of the
-	// pipeline file in the environment
-	absPipelineFile, err := filepath.Abs(pipelineFile)
-	pcheck(err)
-	pcheck(os.Setenv("DMK_PIPELINE", absPipelineFile))
+	if pipelineFile == "-" {
+		// If they are using stdin, we don't change directory
+		pcheck(os.Setenv("DMK_PIPELINE", "STDIN"))
+		verb.Printf("Will NOT change current directory\n")
+	} else {
+		// Before we change directory, go ahead save the absolute path of the
+		// pipeline file in the environment
+		absPipelineFile, err := filepath.Abs(pipelineFile)
+		pcheck(err)
+		pcheck(os.Setenv("DMK_PIPELINE", absPipelineFile))
 
-	// Change to the pipeline file's directory: note that this must happen
-	// before we parse the config file for globbing to work
-	pipelineDir := filepath.Dir(pipelineFile)
-	if pipelineDir != "." {
-		verb.Printf("Changing current directory to: %s\n", pipelineDir)
+		// Change to the pipeline file's directory: note that this must happen
+		// before we parse the config file for globbing to work
+		pipelineDir := filepath.Dir(pipelineFile)
+		if pipelineDir != "." {
+			verb.Printf("Changing current directory to: %s\n", pipelineDir)
+		}
+		pcheck(os.Chdir(pipelineDir))
 	}
-	pcheck(os.Chdir(pipelineDir))
 
 	// Parse the config file
 	cfg, err := ReadConfig(cfgText)
