@@ -239,8 +239,8 @@ See "Abstract/Base Steps" below for an example.
 
 # Abstract/Base Steps
 
-`dmk` provides a way to create small template steps to make things easier to
-manage. Often you'll have a few steps that have similar structures. In 
+`dmk` provides a way to create small template steps so that you can simplify
+pipeline files.  Often you'll have a few steps that have similar structures. In
 that case you can specify a step with `abstract: true`. These steps will never
 be executed, but provide a "template" for "concrete" steps.
 
@@ -290,10 +290,10 @@ command `echo $A Anything Missing` will be executed by bash, which will expand
 
 # Build Step Environment
 
-Before the pipeline file is read, `dmk` will load the env file specified by the
-(optional) `-e` command line parameter. This functionality comes from the excellent
-[GoDotEnv](https://github.com/joho/godotenv) library, which is based on the Ruby dotenv
-project.
+Before reading the pipeline file, `dmk` will load the env file specified by the
+(optional) `-e` command line parameter. This functionality comes from the
+excellent [GoDotEnv](https://github.com/joho/godotenv) library, which is based
+on the Ruby dotenv project.
 
 When a build step runs, `dmk` sets environment variables in the step command's
 process:
@@ -305,13 +305,14 @@ process:
 * DMK_OUTPUTS - a colon (":") delimited list of outputs for this step
 * DMK_CLEAN - a colon (":") delimited list of extra clean files for this step
 
-**IMPORTANT!** These DMK_ variables are setup *after* the config file is read
+**IMPORTANT!** These `DMK_` variables are setup *after* config file processing
 and *will* override any variables set in the environment before startup or via
 an env file.
 
-Also note that although `bash` evaluates the command, `dmk` does it's own variable
-expansion before executing the command. However, only `DMK_STEPNAME` will be defined
-for `dmk` variable expansion. See "Using Variables" above for details.
+Also note that although `bash` evaluates the command, `dmk` does it's own
+variable expansion before executing the command. However, only `DMK_STEPNAME`
+will be defined for `dmk` variable expansion. See "Using Variables" above for
+details.
 
 When the command for a step is activated, it will inherit the original
 environment that `dmk` is running in, modified in this order:
@@ -330,12 +331,14 @@ A pipeline file is a YAML document, and a **JSON** document is valid YAML. For
 instance, `res/slowbuild.yaml` and `res/slowbuild.json` are semantically
 identical pipeline files. If you need a customized build, you can generate the
 pipeline file in the language of your choice in JSON or YAML and then call
-`dmk`.
+`dmk`. As example, if you have a script named custom.py that outputs a JSON
+pipeline on stdout, you can run the JIT pipeline with: `python3 custom.py | dmk -f -`.
 
 Commands run in a new bash shell (which also means you need bash).
 
 `dmk` changes to the directory of the Pipeline file, so you can specify file
-names relative to the Pipeline file's directory.
+names relative to the Pipeline file's directory. Of course, the current directory
+is not changed if the Pipeline file is *stdin*.
 
 You may use globbing patterns for the inputs and clean.
 
