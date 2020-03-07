@@ -740,6 +740,16 @@ func Test_Mock_findExpectedCall_Respects_Repeatability(t *testing.T) {
 		}
 	}
 
+	c = m.On("Once", 1).Return("one").Once()
+	c.Repeatability = -1
+	f, c = m.findExpectedCall("Once", 1)
+	if assert.Equal(t, -1, f) {
+		if assert.NotNil(t, c) {
+			assert.Equal(t, "Once", c.Method)
+			assert.Equal(t, 1, c.Arguments[0])
+			assert.Equal(t, "one", c.ReturnArguments[0])
+		}
+	}
 }
 
 func Test_callString(t *testing.T) {
@@ -1245,6 +1255,24 @@ func Test_Arguments_Diff_WithAnythingOfTypeArgument_Failing(t *testing.T) {
 	assert.Equal(t, 1, count)
 	assert.Contains(t, diff, `string != type int - (int=123)`)
 
+}
+
+func Test_Arguments_Diff_WithIsTypeArgument(t *testing.T) {
+	var args = Arguments([]interface{}{"string", IsType(0), true})
+	var count int
+	_, count = args.Diff([]interface{}{"string", 123, true})
+
+	assert.Equal(t, 0, count)
+}
+
+func Test_Arguments_Diff_WithIsTypeArgument_Failing(t *testing.T) {
+	var args = Arguments([]interface{}{"string", IsType(""), true})
+	var count int
+	var diff string
+	diff, count = args.Diff([]interface{}{"string", 123, true})
+
+	assert.Equal(t, 1, count)
+	assert.Contains(t, diff, `string != type int - (int=123)`)
 }
 
 func Test_Arguments_Diff_WithArgMatcher(t *testing.T) {

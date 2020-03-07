@@ -3,7 +3,9 @@ package suite
 import (
 	"errors"
 	"io/ioutil"
+	"math/rand"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -165,15 +167,6 @@ type SuiteTester struct {
 	TimeAfter  []time.Time
 }
 
-type SuiteSkipTester struct {
-	// Include our basic suite logic.
-	Suite
-
-	// Keep counts of how many times each method is run.
-	SetupSuiteRunCount    int
-	TearDownSuiteRunCount int
-}
-
 // The SetupSuite method will be run by testify once, at the very
 // start of the testing suite, before any tests are run.
 func (suite *SuiteTester) SetupSuite() {
@@ -192,18 +185,9 @@ func (suite *SuiteTester) AfterTest(suiteName, testName string) {
 	suite.TimeAfter = append(suite.TimeAfter, time.Now())
 }
 
-func (suite *SuiteSkipTester) SetupSuite() {
-	suite.SetupSuiteRunCount++
-	suite.T().Skip()
-}
-
 // The TearDownSuite method will be run by testify once, at the very
 // end of the testing suite, after all tests have been run.
 func (suite *SuiteTester) TearDownSuite() {
-	suite.TearDownSuiteRunCount++
-}
-
-func (suite *SuiteSkipTester) TearDownSuite() {
 	suite.TearDownSuiteRunCount++
 }
 
@@ -266,6 +250,30 @@ func (suite *SuiteTester) TestSubtest() {
 		})
 		suite.Equal(suiteT, suite.T())
 	}
+}
+
+type SuiteSkipTester struct {
+	// Include our basic suite logic.
+	Suite
+
+	// Keep counts of how many times each method is run.
+	SetupSuiteRunCount    int
+	TearDownSuiteRunCount int
+}
+
+func (suite *SuiteSkipTester) SetupSuite() {
+	suite.SetupSuiteRunCount++
+	suite.T().Skip()
+}
+
+func (suite *SuiteSkipTester) TestNothing() {
+	// SetupSuite is only called when at least one test satisfies
+	// test filter. For this suite to be set up (and then tore down)
+	// it is necessary to add at least one test method.
+}
+
+func (suite *SuiteSkipTester) TearDownSuite() {
+	suite.TearDownSuiteRunCount++
 }
 
 // TestRunSuite will be run by the 'go test' command, so within it, we
@@ -340,6 +348,33 @@ func TestRunSuite(t *testing.T) {
 
 }
 
+// This suite has no Test... methods. It's setup and teardown must be skipped.
+type SuiteSetupSkipTester struct {
+	Suite
+
+	setUp    bool
+	toreDown bool
+}
+
+func (s *SuiteSetupSkipTester) SetupSuite() {
+	s.setUp = true
+}
+
+func (s *SuiteSetupSkipTester) NonTestMethod() {
+
+}
+
+func (s *SuiteSetupSkipTester) TearDownSuite() {
+	s.toreDown = true
+}
+
+func TestSkippingSuiteSetup(t *testing.T) {
+	suiteTester := new(SuiteSetupSkipTester)
+	Run(t, suiteTester)
+	assert.False(t, suiteTester.setUp)
+	assert.False(t, suiteTester.toreDown)
+}
+
 func TestSuiteGetters(t *testing.T) {
 	suite := new(SuiteTester)
 	suite.SetT(t)
@@ -409,4 +444,41 @@ func TestSuiteLogging(t *testing.T) {
 	} else {
 		assert.NotContains(t, output, "TESTLOGPASS")
 	}
+}
+
+type CallOrderSuite struct {
+	Suite
+	callOrder []string
+}
+
+func (s *CallOrderSuite) call(method string) {
+	time.Sleep(time.Duration(rand.Intn(300)) * time.Millisecond)
+	s.callOrder = append(s.callOrder, method)
+}
+
+func TestSuiteCallOrder(t *testing.T) {
+	Run(t, new(CallOrderSuite))
+}
+func (s *CallOrderSuite) SetupSuite() {
+	s.call("SetupSuite")
+}
+
+func (s *CallOrderSuite) TearDownSuite() {
+	s.call("TearDownSuite")
+	assert.Equal(s.T(), "SetupSuite;SetupTest;Test A;TearDownTest;SetupTest;Test B;TearDownTest;TearDownSuite", strings.Join(s.callOrder, ";"))
+}
+func (s *CallOrderSuite) SetupTest() {
+	s.call("SetupTest")
+}
+
+func (s *CallOrderSuite) TearDownTest() {
+	s.call("TearDownTest")
+}
+
+func (s *CallOrderSuite) Test_A() {
+	s.call("Test A")
+}
+
+func (s *CallOrderSuite) Test_B() {
+	s.call("Test B")
 }
