@@ -143,9 +143,6 @@ func main() {
 	}
 
 	os.Exit(exitCode)
-	return
-
-	log.Printf("unreachable\n")
 }
 
 // DoListSteps just outputs all step names
