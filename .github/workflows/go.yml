@@ -24,11 +24,7 @@ jobs:
 
     - name: Get dependencies
       run: |
-        go get -v -t -d ./...
-        if [ -f Gopkg.toml ]; then
-            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-            dep ensure
-        fi
+        echo "Currently, all deps should be vendored"
 
     - name: Build
       run: make testv 
