@@ -13,16 +13,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - name: Set up Go
-      uses: actions/setup-go@v1
-      with:
-        go-version: "^1.14"
-      id: go
-
-    - name: Check out code into the Go module directory
+    - name: Check Out Code
       uses: actions/checkout@v2
 
-    - name: Get dependencies
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: "^1.14"
+      run: go version
+
+    - name: Get Dependencies
       run: echo "Currently, all deps should be vendored"
 
     - name: Lint/Vet
