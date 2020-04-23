@@ -8,17 +8,18 @@ NC='\033[0m' # No Color
 echo ""
 
 echo -e "${GREEN}Pre Update Status${NC}"
-dep status
+go mod graph
 
 echo ""
 
 echo -e "${GREEN}UPDATE${NC}"
-dep ensure -update -v
+go mod tidy
+go mod download
 
 echo ""
 
 echo -e "${RED}POST Update Status${NC}"
-dep status
+go mod graph
 
 echo ""
 
