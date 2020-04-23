@@ -20,7 +20,9 @@ jobs:
       uses: actions/setup-go@v2
       with:
         go-version: "^1.14"
-      run: go version
+
+    - name: Go Version
+    - run: go version
 
     - name: Get Dependencies
       run: echo "Currently, all deps should be vendored"
