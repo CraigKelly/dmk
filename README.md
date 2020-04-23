@@ -143,7 +143,7 @@ a quick example would look like:
 step1:                                # first step
     command: "xformxyz i{1,2,3}.txt"  # command with some shell magic
     inputs:                           # 3 inputs (read by our imaginary command)
-        - i1.txt                  
+        - i1.txt
         - i2.txt
         - i3.txt
     outputs:                          # 3 outputs
@@ -161,7 +161,7 @@ step2:                                # second step
 depstep:                              # third/final step: it won't run until the
     command: cmd2xyz                  # previous steps finish because their
     inputs:                           # outputs are in the this step's inputs.
-        - o3.txt                      
+        - o3.txt
         - output.bin
     outputs:
         - combination.output
@@ -344,11 +344,10 @@ You may use globbing patterns for the inputs and clean.
 
 # Building
 
-`dep` manages dependencies in the vendor directory. Although the project began
-with `godep` (which is/was an excellent tool), we're switching to `dep` in
-anticipation of it becoming the de facto dependency managment tool for Gophers.
-In addition, switching to `dep` before it's the standard seem like a good way
-to give back to the Go community.
+Currently, dependencies are managed with go modules. Before that dependencies
+were vendored and managed with `dep`.  And before *that*, dependencies were
+managed with `godep`. Both were excellent tools, but now we have a standard way
+to manage dependencies in Go - and we no longer have a vendor dir.
 
 You shouldn't need to worry about dependencies if you are building with the
 `Makefile`. Also note the fact that we use `make` to build `dmk`. We are serious
@@ -370,8 +369,8 @@ the bash completions we make available for `dmk`. Note that this will use
 `sudo` and it currently the only way to get the bash completions.
 
 Before submiting a pull-request or merging into a mainline branch, you should
-be sure that `make lint` passes with no errors. We use the standard `go vet`
-plus a few extras. Even though we don't use the entire `gometalinter` suite, we
-do use it to install the linters we use. All this can be handled with
-`make lint-install`.
+be sure that `make lint` passes with no errors. Originally we used `gometalinter`
+with some customizations. Now we use `golangci-lint` with default settings. Use
+`make lint-install` to install any tools necessary for linting.
 
+Currently we do testing and linting in our CI pipeline via GitHub Actions.
