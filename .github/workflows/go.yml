@@ -27,8 +27,12 @@ jobs:
     - name: Get Dependencies
       run: go mod download
 
-    - name: Run golangci-lint
-      uses: actions-contrib/golangci-lint@v1
+    - name: Lint/Vet
+      uses: actions-contrib/golangci-lint@master
+      env:
+        GOROOT: ""
+      with:
+        args: "run"
 
     - name: Test
       run: make testv
