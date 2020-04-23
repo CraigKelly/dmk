@@ -25,7 +25,9 @@ jobs:
       run: go version
 
     - name: Get Dependencies
-      run: make lint-install
+      run: |
+          go mod download
+          make lint-install
 
     - name: Lint/Vet
       run: make lint
