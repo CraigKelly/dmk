@@ -224,7 +224,10 @@ func DoBuild(cfg ConfigFile, verb *log.Logger) int {
 
 	// Wait for them to complete
 	wg.Wait()
-	broad.Kill()
+	err := broad.Kill()
+	if err != nil {
+		verb.Printf("COuld not kill broadcaster: %v\n", err)
+	}
 
 	// Determine and use exit code
 	failCount := 0

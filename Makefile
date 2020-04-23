@@ -26,16 +26,13 @@ clean:
 	$(TOOLDIR)/versiongen
 
 lint-install:
-	go get -u github.com/alecthomas/gometalinter
-	gometalinter --install
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.25.0
 
 format:
 	go fmt *.go
 
 lint: format
-	go vet
-	golint
-	goconst .
+	golangci-lint run
 
 test: $(TESTED) $(TESTRESOURCES)
 $(TESTED): $(SOURCES) $(VERSIONOUT)

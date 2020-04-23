@@ -18,7 +18,9 @@ func TestSlowBuild(t *testing.T) {
 
 	log.SetFlags(0)
 	assert.NoError(os.Chdir("./res"))
-	defer os.Chdir("..")
+	defer func() {
+		assert.NoError(os.Chdir(".."))
+	}()
 
 	cfgText, err := ioutil.ReadFile("slowbuild.yaml")
 	assert.NoError(err)

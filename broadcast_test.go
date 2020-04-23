@@ -71,7 +71,7 @@ func TestBroadcastMultiListener(t *testing.T) {
 	pcheck(b.Send("Message D [last for X]"))
 	pcheck(b.Send("Message LAST"))
 
-	b.Kill()
+	pcheck(b.Kill())
 	wg.Wait()
 
 	for i := 0; i < stdRoutines; i++ {

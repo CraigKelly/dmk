@@ -75,6 +75,7 @@ func TestTimeChecks(t *testing.T) {
 	}
 	tmp.Close()
 	st, e := os.Stat(tmp.Name())
+	pcheck(e)
 	expect := st.ModTime()
 
 	// Single file testing
@@ -96,7 +97,7 @@ func TestTimeChecks(t *testing.T) {
 	assert.NoError(e)
 
 	ti, e = MinTime([]string{tmp.Name(), tmp.Name(), "/dev/null"})
-	// assert.Equal(expect, ti)
+	assert.NotNil(ti) // No equal check
 	assert.NoError(e)
 
 	ti, e = MaxTime([]string{"/dev/null", tmp.Name(), tmp.Name()})

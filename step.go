@@ -90,7 +90,10 @@ func NewBuildStepInst(step *BuildStep, allOutputs map[string]bool, verb *log.Log
 func (i *BuildStepInstance) notify() {
 	for _, file := range i.Step.Outputs {
 		i.verb.Printf("%s: notifying for %s\n", i.Step.Name, file)
-		i.broad.Send(file)
+		err := i.broad.Send(file)
+		if err != nil {
+			i.verb.Printf("%s: ERROR on broadcast send for %s - %v\n", i.Step.Name, file, err)
+		}
 	}
 }
 
@@ -118,7 +121,10 @@ func (i *BuildStepInstance) Run() error {
 		}
 		// We failed to complete a step
 		log.Printf("%s: FAILURE TO CLEANLY FINISH STATE - this is a bug\n", i.Step.Name)
-		i.fail(errors.New("Build step instance state indeterminate"))
+		err := i.fail(errors.New("Build step instance state indeterminate"))
+		if err != nil {
+			i.verb.Printf("And could not fail the step! %v\n", err)
+		}
 	}()
 
 	// The step is "Started"
@@ -137,9 +143,7 @@ func (i *BuildStepInstance) Run() error {
 
 		for msg := range list.Delivery {
 			file := msg.Msg
-			if _, inMap := waitingDeps[file]; inMap {
-				delete(waitingDeps, file)
-			}
+			delete(waitingDeps, file)
 			if len(waitingDeps) > 0 {
 				list.Respond(true) // Keep working
 			} else {

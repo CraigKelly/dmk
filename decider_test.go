@@ -64,7 +64,7 @@ func TestTimeDecider(t *testing.T) {
 	assert.Nil(e)
 
 	// Input older - must NOT build
-	os.Chtimes(o1.Name(), time.Now().Local(), time.Now().Local())
+	pcheck(os.Chtimes(o1.Name(), time.Now().Local(), time.Now().Local()))
 	b, e = d.NeedBuild([]string{i1.Name()}, []string{o1.Name()})
 	assert.False(b)
 	assert.Nil(e)
