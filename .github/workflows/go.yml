@@ -23,8 +23,11 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Get dependencies
-      run: |
-        echo "Currently, all deps should be vendored"
+      run: echo "Currently, all deps should be vendored"
 
-    - name: Build
-      run: make testv 
+    - name: Lint/Vet
+      run: make lint
+
+    - name: Test
+      run: make testv
+
