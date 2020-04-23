@@ -25,13 +25,10 @@ jobs:
       run: go version
 
     - name: Get Dependencies
-      run: |
-          go mod download
-          make lint-install
+      run: go mod download
 
-    - name: Lint/Vet
-      run: make lint
+    - name: Run golangci-lint
+      uses: actions-contrib/golangci-lint@v1
 
     - name: Test
       run: make testv
-
