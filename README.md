@@ -2,6 +2,8 @@
 title: DMK ReadMe
 ---
 
+![Go](https://github.com/CraigKelly/dmk/workflows/Go/badge.svg)
+
 This is a simplified, automated build tool for data projects.
 
 The idea behind dmk is to support build files that are easy to read *and*
