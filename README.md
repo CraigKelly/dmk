@@ -10,6 +10,20 @@ The idea behind dmk is to support build files that are easy to read *and*
 write, and to support automating a build system for data artifacts. `make`,
 `scons`, and `fac` all provided inspiration for `dmk`.
 
+# Project Status
+
+`dmk` does everything that I need it to do, and it is still my go-to project
+for testing out CI/CD ideas. I'm planning on keeping it around for quite a
+while because it's fun and it interests me. However, if you are here
+because you need a tool like this, I think you'll be better served by taking
+a look at [tasks](https://github.com/go-task/task):
+
+* It's an active project with multiple contributors and sponsors
+* It now has pretty much all the features I wanted for `dmk`
+* It has some that I think are great (like an internal shell interpreter for Windows)
+
+So go give them some love :)
+
 # Who should use this?
 
 This is a tool for data flows and simple projects. Often these projects
